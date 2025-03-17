@@ -55,6 +55,10 @@
 <script>
 // Define different basemaps
 
+
+
+
+
 var googleStreets = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
     attribution: '&copy; Google Maps'
 });
@@ -77,8 +81,25 @@ var map = L.map('map', {
     layers: [basemaps["Google Streets"]]  // Default basemap
 });
 
+var imageUrl = 'jbrew1934.png';  // 
+var imageBounds = [
+    [39.903605, -75.235695],  // Bottom-left (Lat, Lon)
+    [39.965321, -75.121852]   // Top-right (Lat, Lon)
+];
+
+// Overlay the historic map onto the Leaflet map
+var historicMap = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.7 }).addTo(map);
+
+
+var overlays = {
+    "1934 Historic Map": historicMap
+};
+
+
 // Add basemap selection control
-L.control.layers(basemaps, null, { position: "topleft" }).addTo(map);
+L.control.layers(basemaps, overlays, { position: "topleft" }).addTo(map);
+// Define the georeferenced image and its bounds
+
 
 // Define category colors
 var categoryColors = {
@@ -256,6 +277,8 @@ function viewFullscreen(img) {
         window.open(img.src, "_blank");
     }
 }
+
+
 
 </script>
 
