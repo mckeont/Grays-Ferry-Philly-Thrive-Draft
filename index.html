@@ -47,6 +47,10 @@
     opacity: 0.7;
 }
 
+.legend img {
+    border-radius: 3px;
+    box-shadow: 0 0 2px rgba(0,0,0,0.2);
+}
 
 .default-circle {
     background: transparent;
@@ -60,17 +64,6 @@
 <script>
 // Define different basemaps
 
-
-
-var mapboxAccessToken = 'pk.eyJ1IjoibWNrZW9udG9tIiwiYSI6ImNtOGM4MzI2dTF2YTEyam9tNml0bWFjN3QifQ.2l7FCKYp4Uf23AIrjbehwA';
-
-var mapboxNoBusiness = L.tileLayer(
-  `https://api.mapbox.com/styles/v1/mckeontom/cm885998500il01s5ehqxgfws/tiles/256/{z}/{x}/{y}@2x?access_token=${mapboxAccessToken}`,
-  {
-    attribution: '&copy; <a href="https://www.mapbox.com/">Mapbox</a>',
-    tileSize: 256
-  }
-);
 
 var cartoVoyagerNoLabels = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
@@ -92,7 +85,6 @@ var basemaps = {
     "Esri World Imagery": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri' }),
     "Esri Topographic": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri' }),
     "Carto Dark Matter": L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; CartoDB'  }),
-    "Mapbox No Business Labels": mapboxNoBusiness,
 	"Carto Voyager (No Labels)": cartoVoyagerNoLabels
 
 };
@@ -120,7 +112,8 @@ var imageBounds = [
 ];
 
 // Overlay the historic map onto the Leaflet map
-var historicMap = L.imageOverlay(imageUrl, imageBounds, { }).addTo(map);
+// var historicMap = L.imageOverlay(imageUrl, imageBounds, { }).addTo(map);
+var historicMap = L.imageOverlay(imageUrl, imageBounds, {});
 
 
 var overlays = {
@@ -128,39 +121,58 @@ var overlays = {
     "1934 Historic Map": historicMap
 };
 
-
-
 // Add basemap selection control
 L.control.layers(basemaps, overlays, { position: "topleft" }).addTo(map);
 // Define the georeferenced image and its bounds
 
 
 // Define category colors
-var categoryColors = {
-    "Environmental Impacts": "red",
-    "Public Space/Parks": "limegreen",
+const categoryColors = {
+    "Parks and Green Spaces": "limegreen",
     "Housing": "orange",
-    "Former Businesses": "purple",
-    "Schools": "deepskyblue",
-    "Streets": "darkred",
-    "Default": "gray"
+    "Businesses": "sienna",
+    "Schools": "gold",
+    "Community Buildings": "lightblue",
+    "Environmental Impacts": "crimson",
+    "Streets": "gray",
+    "Uncategorized Site": "#d3dce6"
 };
 
-// Add a legend
+const categoryOrder = [
+    "Parks and Green Spaces",
+    "Housing",
+    "Businesses",
+    "Schools",
+    "Community Buildings",
+    "Environmental Impacts",
+    "Streets",
+	"Uncategorized Site"
+];
+
+
+
 var legend = L.control({ position: "bottomright" });
 
 legend.onAdd = function(map) {
     var div = L.DomUtil.create("div", "legend");
     div.innerHTML += "<h4>Legend</h4>";
 
-    for (var key in categoryColors) {
-        div.innerHTML += `<i style="background:${categoryColors[key]}; width: 12px; height: 12px; display: inline-block; margin-right: 5px;"></i> ${key}<br>`;
+    for (let key in categoryColors) {
+        // Check if icon is available for this category
+        if (categoryIcons[key]) {
+            div.innerHTML += `<img src="${categoryIcons[key]}" 
+                                   style="width: 20px; height: 20px; vertical-align: middle; margin-right: 6px;"> 
+                              ${key}<br>`;
+        } else {
+            // Fallback to color swatch
+            div.innerHTML += `<i style="background:${categoryColors[key]}; 
+                                         width: 12px; height: 12px; 
+                                         display: inline-block; margin-right: 5px;"></i> ${key}<br>`;
+        }
     }
 
     return div;
 };
-legend.addTo(map);
-
 
 
 // Fetch data and place markers
@@ -176,24 +188,29 @@ function addMarkersInBatches(data, batchSize = 50, delay = 50) {
 batch.forEach(location => {
     if (!location.X || !location.Y) return;
 
-let category = location["Category/Layer"] ? location["Category/Layer"].trim() : "Default";
-let markerColor = categoryColors[category] || categoryColors["Default"];
+    // ✅ First define the category
+	let category = location["Category/Layer"] ? location["Category/Layer"].trim() : "Uncategorized Site";
+    let markerColor = categoryColors[category] || categoryColors["Default"];
 
+    // ✅ Then store the icon (once per category)
+    if (!categoryIcons[category] && location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")) {
+        categoryIcons[category] = convertGoogleDriveImageLink(location["Marker Icon"]);
+    }
 
-let customIcon = location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")
-    ? L.icon({
-        iconUrl: convertGoogleDriveImageLink(location["Marker Icon"]),
-        iconSize: [32, 32], // adjust size as needed
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
-      })
-    : L.divIcon({ 
-        className: "default-circle", 
-        html: `<div style="background:${markerColor}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #333;"></div>` 
-      });
+    // Define the marker icon
+    let customIcon = location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")
+        ? L.icon({
+            iconUrl: convertGoogleDriveImageLink(location["Marker Icon"]),
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            popupAnchor: [0, -32]
+        })
+        : L.divIcon({ 
+            className: "default-circle", 
+            html: `<div style="background:${markerColor}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #333;"></div>` 
+        });
 
-let marker = L.marker([parseFloat(location.X), parseFloat(location.Y)], { icon: customIcon });
-
+    let marker = L.marker([parseFloat(location.X), parseFloat(location.Y)], { icon: customIcon });
 
     marker.on('click', function() {
         showPopup(location);
@@ -202,17 +219,23 @@ let marker = L.marker([parseFloat(location.X), parseFloat(location.Y)], { icon: 
     markersArray.push(marker);
 });
 
+
         i += batchSize;
         if (i < data.length) {
             setTimeout(processBatch, delay);
         } else {
             var markerLayer = L.layerGroup(markersArray);
             map.addLayer(markerLayer);
+			legend.addTo(map);
+
         }
     }
 
     processBatch();
 }
+
+
+const categoryIcons = {};
 
 fetch(apiUrl)
     .then(response => response.json())
@@ -311,12 +334,16 @@ function changeSlide(n, popupId) {
     }
 }
 
+
 function viewFullscreen(img) {
     if (img && img.src) {
         window.open(img.src, "_blank");
     }
 }
 
+
+
 </script>
+
 </body>
 </html>
