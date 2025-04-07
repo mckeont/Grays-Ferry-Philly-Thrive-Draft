@@ -1,349 +1,503 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Philly Thrive Map</title>
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css">
-<meta http-equiv="Content-Language" content="en">
-<meta name="google" content="notranslate">
-
-
-    <style>
-        /* Map Styling */
-        html, body { margin: 0; padding: 0; height: 100vh; overflow: hidden; }
-        #map { width: 100%; height: 100vh; }
-        .popup-content img { max-width: 100%; height: auto; border-radius: 5px; }
-        .carousel-container { text-align: center; }
-        .carousel-slide { display: none; max-width: 100%; max-height: 300px; object-fit: contain; }
-        .carousel-slide.active { display: block; }
-        .prev, .next { cursor: pointer; }
-		
-		.leaflet-popup-content {
-    max-width: 300px;
-}
-.popup-content h2 {
-    font-size: 18px;
-    margin-bottom: 5px;
-}
-
-.legend {
-    background: white;
-    padding: 10px;
-    line-height: 18px;
-    color: #555;
-    border-radius: 5px;
-    box-shadow: 0 0 5px rgba(0,0,0,0.3);
-}
-.legend i {
-    width: 10px;
-    height: 10px;
-    float: left;
-    margin-right: 8px;
-    opacity: 0.7;
-}
-
-.legend img {
-    border-radius: 3px;
-    box-shadow: 0 0 2px rgba(0,0,0,0.2);
-}
-
-.default-circle {
-    background: transparent;
-}
-
-
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Philly Thrive Map</title>
+  
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  
+  <!-- Optional: MarkerCluster -->
+  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css">
+  
+  <meta http-equiv="Content-Language" content="en">
+  <meta name="google" content="notranslate">
+  
+  <style>
+    /* ===== Basic Map & Body Styles ===== */
+    html, body {
+      margin: 0; padding: 0;
+      height: 100vh; overflow: hidden;
+    }
+    #map {
+      width: 100%; height: 100vh;
+    }
+    
+    /* ===== Sidebar Styles (slides over map) ===== */
+    #sidebar {
+      position: absolute;
+      top: 0; right: 0;
+      width: 350px; height: 100%;
+      background: #fff;
+      box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+      padding: 20px;
+      overflow-y: auto;
+      z-index: 1000;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+    #sidebar.visible {
+      transform: translateX(0);
+    }
+    .close-btn {
+      position: absolute;
+      top: 10px; right: 10px;
+      border: none; background: none;
+      font-size: 20px; cursor: pointer;
+    }
+    
+    /* ===== Carousel (for images) ===== */
+    .carousel-main {
+      position: relative;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .carousel-main img {
+      width: 100%;
+      border-radius: 5px;
+    }
+    .carousel-arrows {
+      position: absolute;
+      top: 50%;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      transform: translateY(-50%);
+    }
+    .carousel-arrow {
+      background: #4a148c;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      padding: 5px 10px;
+      font-size: 16px;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+    .carousel-arrow:hover {
+      opacity: 1;
+    }
+    .carousel-counter {
+      margin-top: 5px;
+      font-size: 0.9em;
+      color: #555;
+    }
+    /* Thumbnails */
+    .carousel-thumbnails {
+      display: flex;
+      gap: 5px;
+      overflow-x: auto;
+      margin-bottom: 10px;
+    }
+    .carousel-thumbnails img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 4px;
+      cursor: pointer;
+      opacity: 0.8;
+      border: 2px solid transparent;
+      transition: opacity 0.2s, border 0.2s;
+    }
+    .carousel-thumbnails img:hover {
+      opacity: 1;
+    }
+    .carousel-thumbnails img.active-thumb {
+      border: 2px solid #4a148c;
+      opacity: 1;
+    }
+    
+    /* ===== Additional Sidebar Content ===== */
+    #sidebar h2 {
+      margin-top: 10px;
+    }
+    #sidebar p,
+    #sidebar .section {
+      margin-top: 10px;
+    }
+    
+    /* ===== Global Point Navigation (between markers) ===== */
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+    }
+    .nav-button {
+      background: #4a148c;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s ease;
+    }
+    .nav-button:hover {
+      background: #6a1b9a;
+    }
+    #pointCounter {
+      font-size: 14px;
+      color: #555;
+    }
+    
+    /* ===== Legend Styles (if used) ===== */
+    .legend {
+      background: white;
+      padding: 10px;
+      line-height: 18px;
+      color: #555;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+    .legend i {
+      width: 10px;
+      height: 10px;
+      float: left;
+      margin-right: 8px;
+      opacity: 0.7;
+    }
+    .legend img {
+      border-radius: 3px;
+      box-shadow: 0 0 2px rgba(0,0,0,0.2);
+    }
+    .default-circle { background: transparent; }
+  </style>
 </head>
 <body>
-    <div id="map"></div>
-<script>
-// Define different basemaps
-
-
-var cartoVoyagerNoLabels = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
-  subdomains: 'abcd',
-  maxZoom: 19
-});
-
-
-var googleStreets = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-    attribution: '&copy; Google Maps'
-});
-
-var basemaps = {
-    "Google Streets": googleStreets,
-    "Esri Community Maps":  L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-    attribution: '&copy; Esri, Community Maps Contributors' }),
-    "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }),
-    "Carto Positron": L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; CartoDB' }),
-    "Esri World Imagery": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri' }),
-    "Esri Topographic": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri' }),
-    "Carto Dark Matter": L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; CartoDB'  }),
-	"Carto Voyager (No Labels)": cartoVoyagerNoLabels
-
-};
-
-var bounds = L.latLngBounds(
-    [39.88803551186901, -75.24100534247376],  // Southwest corner
-    [39.96163027738092, -75.1591196365127]   // Northeast corner
-);
-
-var map = L.map('map', {
-    layers: [cartoVoyagerNoLabels],
-    maxBounds: bounds,
-    maxBoundsViscosity: 0.01,
-    minZoom: 12,
-    maxZoom: 18
-});
-
-map.fitBounds(bounds);  // Automatically centers and zooms to fit bounds
-
-
-var imageUrl = 'jbrew1934.png';  // 
-var imageBounds = [
-    [39.903605, -75.235695],  // Bottom-left (Lat, Lon)
-    [39.965321, -75.121852]   // Top-right (Lat, Lon)
-];
-
-// Overlay the historic map onto the Leaflet map
-// var historicMap = L.imageOverlay(imageUrl, imageBounds, { }).addTo(map);
-var historicMap = L.imageOverlay(imageUrl, imageBounds, {});
-
-
-var overlays = {
-   
-    "1934 Historic Map": historicMap
-};
-
-// Add basemap selection control
-L.control.layers(basemaps, overlays, { position: "topleft" }).addTo(map);
-// Define the georeferenced image and its bounds
-
-
-// Define category colors
-const categoryColors = {
-    "Parks and Green Spaces": "limegreen",
-    "Housing": "orange",
-    "Businesses": "sienna",
-    "Schools": "gold",
-    "Community Buildings": "lightblue",
-    "Environmental Impacts": "crimson",
-    "Streets": "gray",
-    "Uncategorized Site": "#d3dce6"
-};
-
-const categoryOrder = [
-    "Parks and Green Spaces",
-    "Housing",
-    "Businesses",
-    "Schools",
-    "Community Buildings",
-    "Environmental Impacts",
-    "Streets",
-	"Uncategorized Site"
-];
-
-
-
-var legend = L.control({ position: "bottomright" });
-
-legend.onAdd = function(map) {
-    var div = L.DomUtil.create("div", "legend");
-    div.innerHTML += "<h4>Legend</h4>";
-
-    for (let key in categoryColors) {
-        // Check if icon is available for this category
-        if (categoryIcons[key]) {
-            div.innerHTML += `<img src="${categoryIcons[key]}" 
-                                   style="width: 20px; height: 20px; vertical-align: middle; margin-right: 6px;"> 
-                              ${key}<br>`;
-        } else {
-            // Fallback to color swatch
-            div.innerHTML += `<i style="background:${categoryColors[key]}; 
-                                         width: 12px; height: 12px; 
-                                         display: inline-block; margin-right: 5px;"></i> ${key}<br>`;
-        }
-    }
-
-    return div;
-};
-
-
-// Fetch data and place markers
-var apiUrl = "https://script.google.com/macros/s/AKfycbzyrIcLZaFyYhwUGviH9bYw5GOzKGooPomy2arJmi2D4V-G8-QF-yME-gqcnaSHUeDYVA/exec";
-
-var markersArray = [];
-
-function addMarkersInBatches(data, batchSize = 50, delay = 50) {
-    let i = 0;
-
-    function processBatch() {
-        let batch = data.slice(i, i + batchSize);
-batch.forEach(location => {
-    if (!location.X || !location.Y) return;
-
-    // ✅ First define the category
-	let category = location["Category/Layer"] ? location["Category/Layer"].trim() : "Uncategorized Site";
-    let markerColor = categoryColors[category] || categoryColors["Default"];
-
-    // ✅ Then store the icon (once per category)
-    if (!categoryIcons[category] && location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")) {
-        categoryIcons[category] = convertGoogleDriveImageLink(location["Marker Icon"]);
-    }
-
-    // Define the marker icon
-    let customIcon = location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")
-        ? L.icon({
-            iconUrl: convertGoogleDriveImageLink(location["Marker Icon"]),
-            iconSize: [32, 32],
-            iconAnchor: [16, 32],
-            popupAnchor: [0, -32]
-        })
-        : L.divIcon({ 
-            className: "default-circle", 
-            html: `<div style="background:${markerColor}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #333;"></div>` 
-        });
-
-    let marker = L.marker([parseFloat(location.X), parseFloat(location.Y)], { icon: customIcon });
-
-    marker.on('click', function() {
-        showPopup(location);
-    });
-
-    markersArray.push(marker);
-});
-
-
-        i += batchSize;
-        if (i < data.length) {
-            setTimeout(processBatch, delay);
-        } else {
-            var markerLayer = L.layerGroup(markersArray);
-            map.addLayer(markerLayer);
-			legend.addTo(map);
-
-        }
-    }
-
-    processBatch();
-}
-
-
-const categoryIcons = {};
-
-fetch(apiUrl)
-    .then(response => response.json())
-    .then(data => addMarkersInBatches(data))
-    .catch(error => console.error("Error fetching data:", error));
-
-function showPopup(location) {
-    let content = `<h2>${location.Name}</h2>`;
-    if (location.Address) content += `<p><strong>Address:</strong> ${location.Address}</p>`;
-
-    // **Ensure a unique ID for each popup**
-    let popupId = location.Name.replace(/\s/g, '');
-
-let images = Object.keys(location)
-    .filter(key => key.startsWith('Image') && location[key]);
-
-if (images.length > 0) {
-    content += `<div id="popup-${popupId}" class="carousel-container">
-                    <p class="image-counter">Image 1 of ${images.length}</p>
-                    <button class="fullscreen-btn" onclick="viewFullscreen()">🔍</button>`;
-
-images.forEach((img, index) => {
-    let imgSrc = location[img]; // Default URL from Google Sheets
-
-    // ✅ Ensure only valid Google Drive URLs are converted
-    if (location[img] && location[img].includes("drive.google.com")) {
-        imgSrc = convertGoogleDriveImageLink(location[img]);
-    }
-
-    content += `<img class="carousel-slide ${index === 0 ? 'active' : ''}" 
-                 src="${imgSrc}" 
-                 onclick="viewFullscreen(this)"
-                 onerror="this.onerror=null; this.style.display='none'; console.error('Image failed:', this.src);">`;
-});
-
-
-    content += `<button class="prev" onclick="changeSlide(-1, 'popup-${popupId}')">&#10094;</button>`;
-    content += `<button class="next" onclick="changeSlide(1, 'popup-${popupId}')">&#10095;</button>`;
-    content += `</div>`;
-} else {
-    content += `<p>No images available</p>`;
-}
-
-
-    // **Handling Audio from GitHub**
-    let audioURL = location["Audio"]; // Read audio column from Google Sheets
-    if (audioURL && audioURL.includes("github.com")) {
-        content += `<h3>Audio Recording:</h3>
-                    <audio controls>
-                        <source src="${audioURL}" type="audio/mpeg">
-                        Your browser does not support the audio element.
-                    </audio>`;
-    }
-
-    L.popup().setLatLng([location.X, location.Y]).setContent(content).openOn(map);
-}
-
-
-function convertGoogleDriveImageLink(url) {
-    let match = url.match(/(?:\/d\/|id=)([a-zA-Z0-9-_]+)/);
-    if (match) {
+  <div id="map"></div>
+  
+  <!-- Sidebar (initially hidden) -->
+  <div id="sidebar">
+    <button class="close-btn" onclick="closeSidebar()">×</button>
+    
+    <!-- Carousel Section -->
+    <div class="carousel-main">
+      <img id="mainImage" src="" alt="Main image">
+      <div class="carousel-arrows">
+        <button class="carousel-arrow" onclick="prevImage()">&#10094;</button>
+        <button class="carousel-arrow" onclick="nextImage()">&#10095;</button>
+      </div>
+      <div class="carousel-counter" id="carouselCounter">0 of 0</div>
+    </div>
+    <div class="carousel-thumbnails" id="carouselThumbnails"></div>
+    
+    <!-- Additional Content -->
+    <h2 id="sidebar-title"></h2>
+    <p id="sidebar-address"></p>
+    <div id="sidebar-text" class="section"></div>
+    <div id="sidebar-contributor" class="section"></div>
+    <div id="videoSection" class="section"></div>
+    <audio controls id="sidebar-audio" style="display: none; width: 100%;">
+      <source id="audio-src" src="" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+    
+    <!-- Global Point Navigation -->
+    <div class="nav-buttons">
+      <button class="nav-button" onclick="prevPoint()">&#10094;</button>
+      <span id="pointCounter"></span>
+      <button class="nav-button" onclick="nextPoint()">&#10095;</button>
+    </div>
+  </div>
+  
+  <script>
+    // ==============================
+    // Global Variables
+    // ==============================
+    let allLocations = [];
+    let currentIndex = 0;
+    let markersArray = [];
+    let imagesArray = []; // Holds carousel images for the current location
+    let currentImgIndex = 0;
+    
+    // ==============================
+    // Helper Functions
+    // ==============================
+    
+    // Convert a Google Drive URL to a direct thumbnail link
+    function convertGoogleDriveImageLink(url) {
+      let match = url.match(/(?:\/d\/|id=)([a-zA-Z0-9-_]+)/);
+      if (match) {
         let fileId = match[1];
-        return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`; // ✅ Ensures proper embedding
+        return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+      }
+      return url;
     }
-    return url;
-}
+    
+    // Extract YouTube Video ID from a URL (handles multiple formats)
+    function extractYouTubeID(url) {
+      const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+    
+    // ==============================
+    // Map Initialization
+    // ==============================
+    var cartoVoyagerNoLabels = L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',
+      { attribution: '&copy; CARTO', subdomains: 'abcd', maxZoom: 19 }
+    );
+    var googleStreets = L.tileLayer(
+      'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+      { attribution: '&copy; Google Maps' }
+    );
+    var basemaps = {
+      "Google Streets": googleStreets,
+      "Esri World Imagery": L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        { attribution: '&copy; Esri' }
+      ),
 
-function changeSlide(n, popupId) {
-    console.log("Popup ID:", popupId);  // Debugging: Check the popupId
-    let popup = document.getElementById(popupId);
+      "Carto Voyager (No Labels)": cartoVoyagerNoLabels
+    };
+    var bounds = L.latLngBounds(
+      [39.88803551186901, -75.24100534247376],
+      [39.96163027738092, -75.1591196365127]
+    );
+var map = L.map('map', {
+  layers: [cartoVoyagerNoLabels],
+  maxBounds: bounds,
+  minZoom: 12,
+  maxZoom: 20
+});
+map.setView([39.9362, -75.1956], 16);
 
-    if (!popup) {
-        console.error(`Popup with ID popup-${popupId} not found!`);
+
+    // Optional: Historic overlay (not shown by default)
+    var imageUrl = 'jbrew1934.png';
+    var imageBounds = [
+      [39.903605, -75.235695],
+      [39.965321, -75.121852]
+    ];
+    var historicMap = L.imageOverlay(imageUrl, imageBounds, {});
+    var overlays = { "1934 Historic Map": historicMap };
+    L.control.layers(basemaps, overlays, { position: "topleft" }).addTo(map);
+    
+    // ==============================
+    // Category Colors & Legend
+    // ==============================
+    const categoryColors = {
+      "Parks and Green Spaces": "limegreen",
+      "Housing": "orange",
+      "Businesses": "sienna",
+      "Schools": "gold",
+      "Community Buildings": "lightblue",
+      "Environmental Impacts": "crimson",
+      "Streets": "gray",
+      "Uncategorized Site": "#d3dce6"
+    };
+    const categoryOrder = [
+      "Parks and Green Spaces",
+      "Housing",
+      "Businesses",
+      "Schools",
+      "Community Buildings",
+      "Environmental Impacts",
+      "Streets",
+      "Uncategorized Site"
+    ];
+    var legend = L.control({ position: "bottomleft" });
+    legend.onAdd = function(map) {
+      var div = L.DomUtil.create("div", "legend");
+      div.innerHTML += "<h4>Legend</h4>";
+      categoryOrder.forEach(key => {
+        if (categoryIcons[key]) {
+          div.innerHTML += `<div><img src="${categoryIcons[key]}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 6px;"> ${key}</div>`;
+        } else {
+          div.innerHTML += `<div><i style="background:${categoryColors[key]}; width: 12px; height: 12px; display: inline-block; margin-right: 5px;"></i> ${key}</div>`;
+        }
+      });
+      return div;
+    };
+    
+    // Global object for legend icons
+    const categoryIcons = {};
+    
+    // ==============================
+    // Data Fetch & Marker Creation
+    // ==============================
+    var apiUrl = "https://script.google.com/macros/s/AKfycbzyrIcLZaFyYhwUGviH9bYw5GOzKGooPomy2arJmi2D4V-G8-QF-yME-gqcnaSHUeDYVA/exec";
+    fetch(apiUrl)
+      .then(response => response.json())
+      .then(data => {
+        allLocations = data;
+        data.forEach((location, index) => {
+          if (!location.X || !location.Y) return;
+          // Use "Category/Layer" or fallback
+          let category = location["Category/Layer"] ? location["Category/Layer"].trim() : "Uncategorized Site";
+          // Store category icon for legend (if available)
+          if (!categoryIcons[category] && location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")) {
+            categoryIcons[category] = convertGoogleDriveImageLink(location["Marker Icon"]);
+          }
+          // Create marker icon
+          let customIcon = location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")
+            ? L.icon({
+                iconUrl: convertGoogleDriveImageLink(location["Marker Icon"]),
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -32]
+              })
+            : L.divIcon({
+                className: "default-circle",
+                html: `<div style="background:${categoryColors[category]}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #333;"></div>`
+              });
+          let marker = L.marker([parseFloat(location.X), parseFloat(location.Y)], { icon: customIcon });
+          // On marker click, update the sidebar with point details
+          marker.on('click', () => {
+            updateSidebar(location, allLocations.indexOf(location));
+          });
+          markersArray.push(marker);
+        });
+        L.layerGroup(markersArray).addTo(map);
+        legend.addTo(map);
+      })
+      .catch(error => console.error("Error fetching data:", error));
+    
+    // ==============================
+    // Sidebar Update Function
+    // ==============================
+    function updateSidebar(location, index) {
+      currentIndex = index;
+      document.getElementById("sidebar").classList.add("visible");
+      
+      // Update text fields
+      document.getElementById("sidebar-title").textContent = location.Name || "";
+      document.getElementById("sidebar-address").textContent = location.Address || "";
+      // Choose which text to show (Document or Text)
+      document.getElementById("sidebar-text").innerHTML = location.Document || location.Text || "";
+      document.getElementById("sidebar-contributor").textContent = location["Contributed by"] ? "Contributed by: " + location["Contributed by"] : "";
+      
+      // Handle Audio (if available)
+      if (location.Audio && location.Audio.includes("github.com")) {
+        document.getElementById("sidebar-audio").style.display = "block";
+        document.getElementById("audio-src").src = location.Audio;
+        document.getElementById("sidebar-audio").load();
+      } else {
+        document.getElementById("sidebar-audio").style.display = "none";
+      }
+      
+      // Build Image Carousel:
+      // Use exact column names "Image 1", "Image 2", etc.
+      imagesArray = [];
+      for (let i = 1; i <= 14; i++) {
+        const imageKey = "Image " + i; // Ensure this matches your spreadsheet header exactly
+        if (location[imageKey]) {
+          imagesArray.push({
+            url: convertGoogleDriveImageLink(location[imageKey]),
+            desc: location[imageKey + " Description"] || ""
+          });
+        }
+      }
+      buildCarousel(imagesArray);
+      
+      // Build Video Section:
+      const videoSection = document.getElementById("videoSection");
+      videoSection.innerHTML = "";
+      if (location.Video) {
+        let videoId = extractYouTubeID(location.Video);
+        if (videoId) {
+          let iframe = document.createElement("iframe");
+          iframe.width = "100%";
+          iframe.height = "200";
+          iframe.src = "https://www.youtube.com/embed/" + videoId;
+          iframe.frameBorder = "0";
+          iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+          iframe.allowFullscreen = true;
+          let videoDiv = document.createElement("div");
+          videoDiv.className = "video-container";
+          videoDiv.appendChild(iframe);
+          if (location["Video Description"]) {
+            let vidDesc = document.createElement("p");
+            vidDesc.textContent = location["Video Description"];
+            vidDesc.style.fontSize = "0.9em";
+            vidDesc.style.color = "#555";
+            videoDiv.appendChild(vidDesc);
+          }
+          videoSection.appendChild(videoDiv);
+        }
+      }
+      
+      // Update global point counter
+      updatePointCounter();
+      
+      console.log("Sidebar updated for:", location);
+    }
+    
+    // ==============================
+    // Carousel Functions (Images)
+    // ==============================
+    function buildCarousel(imgArray) {
+      const mainImage = document.getElementById("mainImage");
+      const carouselCounter = document.getElementById("carouselCounter");
+      const thumbnailsContainer = document.getElementById("carouselThumbnails");
+      thumbnailsContainer.innerHTML = "";
+      
+      if (imgArray.length === 0) {
+        mainImage.src = "";
+        carouselCounter.textContent = "No images available";
         return;
+      }
+      
+      currentImgIndex = 0;
+      showImage(currentImgIndex);
+      
+      // Build thumbnails
+      imgArray.forEach((imgObj, idx) => {
+        let thumb = document.createElement("img");
+        thumb.src = imgObj.url;
+        thumb.onclick = () => showImage(idx);
+        thumbnailsContainer.appendChild(thumb);
+      });
     }
-
-    let slides = popup.querySelectorAll(".carousel-slide");
-    let counter = popup.querySelector(".image-counter");
-
-    console.log("Slides found:", slides.length);  // Debugging: Check how many slides exist
-    if (!slides.length) {
-        console.error("No slides found inside popup.");
-        return;
+    
+    function showImage(index) {
+      if (imagesArray.length === 0) return;
+      currentImgIndex = (index + imagesArray.length) % imagesArray.length;
+      document.getElementById("mainImage").src = imagesArray[currentImgIndex].url;
+      document.getElementById("carouselCounter").textContent = (currentImgIndex + 1) + " of " + imagesArray.length;
+      
+      // Highlight active thumbnail
+      const thumbs = document.getElementById("carouselThumbnails").querySelectorAll("img");
+      thumbs.forEach((thumb, idx) => {
+        thumb.classList.toggle("active-thumb", idx === currentImgIndex);
+      });
     }
-
-    let activeIndex = Array.from(slides).findIndex(slide => slide.classList.contains("active"));
-    console.log("Active slide index before:", activeIndex);
-
-    let newIndex = (activeIndex + n + slides.length) % slides.length;
-    console.log("New active slide index:", newIndex);
-
-    slides.forEach((slide, i) => slide.classList.toggle("active", i === newIndex));
-
-    if (counter) {
-        counter.textContent = `Image ${newIndex + 1} of ${slides.length}`;
+    
+    function nextImage() {
+      showImage(currentImgIndex + 1);
     }
-}
-
-
-function viewFullscreen(img) {
-    if (img && img.src) {
-        window.open(img.src, "_blank");
+    function prevImage() {
+      showImage(currentImgIndex - 1);
     }
-}
-
-
-
-</script>
-
+    
+    // ==============================
+    // Global Sidebar (Point) Navigation
+    // ==============================
+    function nextPoint() {
+      let nextIndex = (currentIndex + 1) % allLocations.length;
+      updateSidebar(allLocations[nextIndex], nextIndex);
+      map.panTo([allLocations[nextIndex].X, allLocations[nextIndex].Y]);
+    }
+    function prevPoint() {
+      let prevIndex = (currentIndex - 1 + allLocations.length) % allLocations.length;
+      updateSidebar(allLocations[prevIndex], prevIndex);
+      map.panTo([allLocations[prevIndex].X, allLocations[prevIndex].Y]);
+    }
+    function updatePointCounter() {
+      document.getElementById("pointCounter").textContent = (currentIndex + 1) + " of " + allLocations.length;
+    }
+    
+    // ==============================
+    // Sidebar Close Function
+    // ==============================
+    function closeSidebar() {
+      document.getElementById("sidebar").classList.remove("visible");
+    }
+  </script>
 </body>
 </html>
