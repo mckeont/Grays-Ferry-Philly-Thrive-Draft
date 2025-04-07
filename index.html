@@ -48,6 +48,11 @@
 }
 
 
+.default-circle {
+    background: transparent;
+}
+
+
     </style>
 </head>
 <body>
@@ -57,6 +62,21 @@
 
 
 
+var mapboxAccessToken = 'pk.eyJ1IjoibWNrZW9udG9tIiwiYSI6ImNtOGM4MzI2dTF2YTEyam9tNml0bWFjN3QifQ.2l7FCKYp4Uf23AIrjbehwA';
+
+var mapboxNoBusiness = L.tileLayer(
+  `https://api.mapbox.com/styles/v1/mckeontom/cm885998500il01s5ehqxgfws/tiles/256/{z}/{x}/{y}@2x?access_token=${mapboxAccessToken}`,
+  {
+    attribution: '&copy; <a href="https://www.mapbox.com/">Mapbox</a>',
+    tileSize: 256
+  }
+);
+
+var cartoVoyagerNoLabels = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+  subdomains: 'abcd',
+  maxZoom: 19
+});
 
 
 var googleStreets = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
@@ -71,15 +91,27 @@ var basemaps = {
     "Carto Positron": L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; CartoDB' }),
     "Esri World Imagery": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri' }),
     "Esri Topographic": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri' }),
-    "Carto Dark Matter": L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; CartoDB' })
+    "Carto Dark Matter": L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; CartoDB'  }),
+    "Mapbox No Business Labels": mapboxNoBusiness,
+	"Carto Voyager (No Labels)": cartoVoyagerNoLabels
+
 };
 
-// Initialize map with default basemap
+var bounds = L.latLngBounds(
+    [39.88803551186901, -75.24100534247376],  // Southwest corner
+    [39.96163027738092, -75.1591196365127]   // Northeast corner
+);
+
 var map = L.map('map', {
-    center: [39.9372, -75.1973],
-    zoom: 14,
-    layers: [basemaps["Google Streets"]]  // Default basemap
+    layers: [cartoVoyagerNoLabels],
+    maxBounds: bounds,
+    maxBoundsViscosity: 0.01,
+    minZoom: 12,
+    maxZoom: 18
 });
+
+map.fitBounds(bounds);  // Automatically centers and zooms to fit bounds
+
 
 var imageUrl = 'jbrew1934.png';  // 
 var imageBounds = [
@@ -88,12 +120,14 @@ var imageBounds = [
 ];
 
 // Overlay the historic map onto the Leaflet map
-var historicMap = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.7 }).addTo(map);
+var historicMap = L.imageOverlay(imageUrl, imageBounds, { }).addTo(map);
 
 
 var overlays = {
+   
     "1934 Historic Map": historicMap
 };
+
 
 
 // Add basemap selection control
@@ -146,14 +180,20 @@ let category = location["Category/Layer"] ? location["Category/Layer"].trim() : 
 let markerColor = categoryColors[category] || categoryColors["Default"];
 
 
-    let marker = L.circleMarker([parseFloat(location.X), parseFloat(location.Y)], {
-        radius: 12,  // Bigger markers
-        fillColor: markerColor,
-        color: markerColor,  // Ensuring stroke color matches
-        weight: 2,  // Thicker border
-        opacity: 1,
-        fillOpacity: 0.8
-    });
+let customIcon = location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")
+    ? L.icon({
+        iconUrl: convertGoogleDriveImageLink(location["Marker Icon"]),
+        iconSize: [32, 32], // adjust size as needed
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+      })
+    : L.divIcon({ 
+        className: "default-circle", 
+        html: `<div style="background:${markerColor}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #333;"></div>` 
+      });
+
+let marker = L.marker([parseFloat(location.X), parseFloat(location.Y)], { icon: customIcon });
+
 
     marker.on('click', function() {
         showPopup(location);
@@ -271,16 +311,12 @@ function changeSlide(n, popupId) {
     }
 }
 
-
 function viewFullscreen(img) {
     if (img && img.src) {
         window.open(img.src, "_blank");
     }
 }
 
-
-
 </script>
-
 </body>
 </html>
