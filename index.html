@@ -430,7 +430,13 @@
 	  document.getElementById("sidebar-address").innerHTML = location.Address
       ? `<span style="font-weight:500; color:#555;">📍 Address:</span> ${location.Address}`
       : "";
-      document.getElementById("sidebar-text").innerHTML = location.Document || location.Text || "";
+// Clean and format the description text
+const rawText = location.Document || location.Text || "";
+const formattedText = rawText
+  .split(/\n\s*\n+/) // Split at double line breaks (paragraphs)
+  .map(para => `<p>${para.trim()}</p>`) // Wrap each in <p> tags
+  .join("");
+document.getElementById("sidebar-text").innerHTML = formattedText;
       document.getElementById("sidebar-contributor").textContent = location["Contributed by"] ? "Contributed by: " + location["Contributed by"] : "";
       
       // Handle Audio (if available)
