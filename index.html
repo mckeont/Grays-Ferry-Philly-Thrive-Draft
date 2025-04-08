@@ -316,6 +316,15 @@
     // ==============================
     // Map Initialization
     // ==============================
+	    const cartoVoyagerLabels = L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',
+      {
+        attribution: 'Labels © OpenStreetMap contributors, © CARTO',
+        subdomains: 'abcd',
+        maxZoom: 19,
+        pane: 'labelsPane'
+      }
+    );
     var cartoVoyagerNoLabels = L.tileLayer(
       'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',
       { attribution: '&copy; CARTO', subdomains: 'abcd', maxZoom: 19 }
@@ -345,7 +354,14 @@ var map = L.map('map', {
 });
 map.setView([39.9362, -75.1956], 16);
 
+    // Create a special pane for labels so they sit on top of other layers
+    map.createPane('labelsPane');
+    map.getPane('labelsPane').style.zIndex = 650; // ensure labels above markers
+    map.getPane('labelsPane').style.pointerEvents = 'none';
 
+    // Add the labels overlay on top
+    cartoVoyagerLabels.addTo(map);
+	
     // Optional: Historic overlay (not shown by default)
     var imageUrl = 'jbrew1934.png';
     var imageBounds = [
@@ -353,7 +369,10 @@ map.setView([39.9362, -75.1956], 16);
       [39.965321, -75.121852]
     ];
     var historicMap = L.imageOverlay(imageUrl, imageBounds, {});
-    var overlays = { "1934 Historic Map": historicMap };
+    var overlays = { 
+	"1934 Historic Map": historicMap,
+	"Street Labels": cartoVoyagerLabels
+	};
     L.control.layers(basemaps, overlays, { position: "topleft" }).addTo(map);
     
     // ==============================
