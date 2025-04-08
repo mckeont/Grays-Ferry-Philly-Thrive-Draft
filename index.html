@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Philly Thrive Map</title>
+  <title>Philly Thrive Map with Unified Carousel</title>
   
   <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   
-  <!-- Optional: MarkerCluster -->
+  <!-- Optional: MarkerCluster (if using) -->
   <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css">
   
@@ -26,30 +26,20 @@
       width: 100%; height: 100vh;
     }
     
-#sidebar {
-  position: absolute;
-  top: 0; right: 0;
-  width: 350px; height: 100%;
-  background: #fff;
-  box-shadow: -2px 0 5px rgba(0,0,0,0.3);
-  padding: 20px;
-  z-index: 1000;
-  transform: translateX(100%);
-  transition: transform 0.3s ease;
-  display: flex;
-  flex-direction: column;
-}
-
-#sidebar-contributor {
-  font-size: 0.85em;
-  color: #555;
-  font-style: italic;
-  margin-top: 15px;
-  text-align: right;
-  opacity: 0.8;
-}
-
-
+    /* ===== Sidebar Styles ===== */
+    #sidebar {
+      position: absolute;
+      top: 0; right: 0;
+      width: 350px; height: 100%;
+      background: #fff;
+      box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+      padding: 20px;
+      z-index: 1000;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
     #sidebar.visible {
       transform: translateX(0);
     }
@@ -59,61 +49,80 @@
       border: none; background: none;
       font-size: 20px; cursor: pointer;
     }
+    .scrollable-content {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding-bottom: 20px;
+    }
+    .point-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      gap: 8px;
+    }
+    .point-header h2 {
+      flex-grow: 1;
+      text-align: center;
+      font-size: 1.3em;
+      margin: 0;
+      font-weight: bold;
+    }
+    .nav-button {
+      background: #6a1b9a;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      padding: 6px 10px;
+      font-size: 18px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+    .nav-button:hover {
+      background: #4a148c;
+    }
+    .point-counter {
+      text-align: center;
+      margin-top: 4px;
+      font-weight: bold;
+      color: #333;
+    }
     
-    /* ===== Carousel (for images) ===== */
+    /* ===== Carousel Styles ===== */
     .carousel-main {
       position: relative;
       text-align: center;
       margin-bottom: 10px;
     }
-    .carousel-main img {
+    .carousel-main img,
+    .carousel-main iframe {
       width: 100%;
       border-radius: 5px;
-    }
-
-/* For point/page navigation */
-.nav-button {
-  background: #6a1b9a;
-  color: #fff;
-  border: none;
-  border-radius: 50%; /* Make them round */
-  padding: 6px 10px;
-  font-size: 18px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.2);
-}
-
-.nav-button:hover {
-  background: #4a148c;
-}
-
-/* For image arrows (make lighter & rectangular) */
-.carousel-arrow {
-  background: #e0d4ec;
-  color: #4a148c;
-  border: 1px solid #b39ddb;
-  border-radius: 4px;
-  font-weight: bold;
-  padding: 4px 12px;
-  font-size: 16px;
-  margin: 0 5px;
-}
-
-.carousel-arrows {
-  display: flex;
-  justify-content: center;
-  margin-top: 8px;
-}
-
-
-    .carousel-arrow:hover {
-      opacity: 1;
     }
     .carousel-counter {
       margin-top: 5px;
       font-size: 0.9em;
       color: #555;
     }
-    /* Thumbnails */
+    .carousel-arrows {
+      display: flex;
+      justify-content: center;
+      margin-top: 8px;
+    }
+    .carousel-arrow {
+      background: #e0d4ec;
+      color: #4a148c;
+      border: 1px solid #b39ddb;
+      border-radius: 4px;
+      font-weight: bold;
+      padding: 4px 12px;
+      font-size: 16px;
+      margin: 0 5px;
+      cursor: pointer;
+    }
+    .carousel-arrow:hover {
+      opacity: 1;
+    }
     .carousel-thumbnails {
       display: flex;
       gap: 5px;
@@ -137,9 +146,8 @@
       border: 2px solid #4a148c;
       opacity: 1;
     }
-
-
-    /* ===== Additional Sidebar Content ===== */
+    
+    /* ===== Other Sidebar Content Styles ===== */
     #sidebar h2 {
       margin-top: 10px;
     }
@@ -147,33 +155,16 @@
     #sidebar .section {
       margin-top: 10px;
     }
+    #sidebar-contributor {
+      font-size: 0.85em;
+      color: #555;
+      font-style: italic;
+      margin-top: 15px;
+      text-align: right;
+      opacity: 0.8;
+    }
     
-.point-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 10px;
-  gap: 8px;
-}
-
-.point-header h2 {
-  flex-grow: 1;
-  text-align: center;
-  font-size: 1.3em;
-  margin: 0;
-  font-weight: bold;
-}
-
-
-.point-counter {
-  text-align: center;
-  margin-top: 4px;
-  font-weight: bold;
-  color: #333;
-}
-
-    
-    /* ===== Legend Styles (if used) ===== */
+    /* ===== Legend Styles ===== */
     .legend {
       background: white;
       padding: 10px;
@@ -189,105 +180,64 @@
       margin-right: 8px;
       opacity: 0.7;
     }
-    .legend img {
-      border-radius: 3px;
-      box-shadow: 0 0 2px rgba(0,0,0,0.2);
-    }
-    .default-circle { background: transparent; }
-	
-	#sidebar-title {
-  font-size: 1.3em;
-  margin-top: 10px;
-  font-weight: bold;
-  text-align: center;
-}
-
-	
-.nav-buttons.top-point-nav {
-  position: absolute;
-  top: 10px;
-  right: 50px;
-  z-index: 10;
-}
-
-
-.nav-buttons.top-point-nav .nav-button {
-  background: #6a1b9a; /* same purple as your thumbnails/arrows */
-  border-radius: 6px;
-  padding: 4px 8px;
-  font-size: 16px;
-}
-
-#pointCounter {
-  font-weight: bold;
-  color: #333;
-}
-
-
-#sidebar .scrollable-content {
-  flex-grow: 1;
-  overflow-y: auto;
-  padding-bottom: 20px; /* Gives space below long text */
-}
-
-
   </style>
 </head>
 <body>
   <div id="map"></div>
   
-<div id="sidebar">
-  <button class="close-btn" onclick="closeSidebar()">×</button>
-
-<div class="scrollable-content">
-  <div class="point-header">
-    <button class="nav-button" onclick="prevPoint()" title="Previous Location">&#10094;</button>
-    <h2 id="sidebar-title">Title</h2>
-    <button class="nav-button" onclick="nextPoint()" title="Next Location">&#10095;</button>
-  </div>
-
-  <div id="pointCounter" class="point-counter"></div>
-
-  <div class="carousel-main">
-    <img id="mainImage" src="" alt="Main image">
-    <div class="carousel-counter" id="carouselCounter">0 of 0</div>
-    <div class="carousel-arrows">
-      <button class="carousel-arrow" onclick="prevImage()">&#10094;</button>
-      <button class="carousel-arrow" onclick="nextImage()">&#10095;</button>
+  <div id="sidebar">
+    <button class="close-btn" onclick="closeSidebar()">×</button>
+    <div class="scrollable-content">
+      <div class="point-header">
+        <button class="nav-button" onclick="prevPoint()" title="Previous Location">&#10094;</button>
+        <h2 id="sidebar-title">Title</h2>
+        <button class="nav-button" onclick="nextPoint()" title="Next Location">&#10095;</button>
+      </div>
+      <div id="pointCounter" class="point-counter"></div>
+      
+      <!-- ===== Unified Carousel Container ===== -->
+      <div class="carousel-main" id="carouselMainContainer">
+        <!-- Main media elements (image or video) -->
+        <img id="mainImage" style="display: none;" alt="Main Media">
+        <iframe id="mainVideo" style="display: none;" width="100%" height="200" frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+        </iframe>
+        <!-- Media caption -->
+        <div id="mediaCaption" style="margin-top:4px; font-size:0.9em; color:#555;"></div>
+        <!-- Carousel counter -->
+        <div class="carousel-counter" id="carouselCounter">0 of 0</div>
+        <!-- Navigation arrows -->
+        <div class="carousel-arrows">
+          <button class="carousel-arrow" onclick="prevMedia()">&#10094;</button>
+          <button class="carousel-arrow" onclick="nextMedia()">&#10095;</button>
+        </div>
+      </div>
+      
+      <!-- Thumbnails for carousel items -->
+      <div class="carousel-thumbnails" id="carouselThumbnails"></div>
+      
+      <p id="sidebar-address"></p>
+      <div id="sidebar-text" class="section"></div>
+      
+      <!-- Optional: Audio (if available) -->
+      <audio controls id="sidebar-audio" style="display: none; width: 100%;">
+        <source id="audio-src" src="" type="audio/mpeg">
+        Your browser does not support the audio element.
+      </audio>
+      
+      <div id="sidebar-contributor" class="section"></div>
     </div>
   </div>
-
-  <div class="carousel-thumbnails" id="carouselThumbnails"></div>
-
-  <p id="sidebar-address"></p>
-  <div id="sidebar-text" class="section"></div>
-
-  <div id="videoSection" class="section"></div>
   
-  <audio controls id="sidebar-audio" style="display: none; width: 100%;">
-    <source id="audio-src" src="" type="audio/mpeg">
-    Your browser does not support the audio element.
-  </audio>
-    <div id="sidebar-contributor" class="section"></div>
-</div>
-
-
-
   <script>
-    // ==============================
-    // Global Variables
-    // ==============================
+    /******** Global Variables & Helper Functions ********/
     let allLocations = [];
     let currentIndex = 0;
     let markersArray = [];
-    let imagesArray = []; // Holds carousel images for the current location
-    let currentImgIndex = 0;
+    let carouselItems = []; // Unified array for images and videos
+    let currentMediaIndex = 0;
     
-    // ==============================
-    // Helper Functions
-    // ==============================
-    
-    // Convert a Google Drive URL to a direct thumbnail link
+    // Convert a Google Drive URL into a direct thumbnail link.
     function convertGoogleDriveImageLink(url) {
       let match = url.match(/(?:\/d\/|id=)([a-zA-Z0-9-_]+)/);
       if (match) {
@@ -297,26 +247,24 @@
       return url;
     }
     
-    // Extract YouTube Video ID from a URL (handles multiple formats)
-   function extractYouTubeID(url) {
-  try {
-    const parsed = new URL(url);
-    if (parsed.hostname === "youtu.be") {
-      return parsed.pathname.slice(1);
+    // Extract a YouTube Video ID from various URL formats.
+    function extractYouTubeID(url) {
+      try {
+        const parsed = new URL(url);
+        if (parsed.hostname === "youtu.be") {
+          return parsed.pathname.slice(1);
+        }
+        if (parsed.hostname.includes("youtube.com")) {
+          return parsed.searchParams.get("v");
+        }
+      } catch (e) {
+        return null;
+      }
+      return null;
     }
-    if (parsed.hostname.includes("youtube.com")) {
-      return parsed.searchParams.get("v");
-    }
-  } catch (e) {
-    return null;
-  }
-  return null;
-}
-
-    // ==============================
-    // Map Initialization
-    // ==============================
-	    const cartoVoyagerLabels = L.tileLayer(
+    
+    /******** Map Initialization ********/
+    const cartoVoyagerLabels = L.tileLayer(
       'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',
       {
         attribution: 'Labels © OpenStreetMap contributors, © CARTO',
@@ -339,30 +287,27 @@
         'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         { attribution: '&copy; Esri' }
       ),
-
       "Carto Voyager (No Labels)": cartoVoyagerNoLabels
     };
     var bounds = L.latLngBounds(
       [39.88803551186901, -75.24100534247376],
       [39.96163027738092, -75.1591196365127]
     );
-var map = L.map('map', {
-  layers: [cartoVoyagerNoLabels],
-  maxBounds: bounds,
-  minZoom: 12,
-  maxZoom: 20
-});
-map.setView([39.9362, -75.1956], 16);
-
-    // Create a special pane for labels so they sit on top of other layers
+    var map = L.map('map', {
+      layers: [cartoVoyagerNoLabels],
+      maxBounds: bounds,
+      minZoom: 12,
+      maxZoom: 20
+    });
+    map.setView([39.9362, -75.1956], 16);
+    
+    // Create a pane for labels to appear above markers.
     map.createPane('labelsPane');
-    map.getPane('labelsPane').style.zIndex = 650; // ensure labels above markers
+    map.getPane('labelsPane').style.zIndex = 650;
     map.getPane('labelsPane').style.pointerEvents = 'none';
-
-    // Add the labels overlay on top
     cartoVoyagerLabels.addTo(map);
-	
-    // Optional: Historic overlay (not shown by default)
+    
+    // Optional: Add a historic image overlay.
     var imageUrl = 'jbrew1934.png';
     var imageBounds = [
       [39.903605, -75.235695],
@@ -370,14 +315,12 @@ map.setView([39.9362, -75.1956], 16);
     ];
     var historicMap = L.imageOverlay(imageUrl, imageBounds, {});
     var overlays = { 
-	"1934 Historic Map": historicMap,
-	"Street Labels": cartoVoyagerLabels
-	};
+      "1934 Historic Map": historicMap,
+      "Street Labels": cartoVoyagerLabels
+    };
     L.control.layers(basemaps, overlays, { position: "topleft" }).addTo(map);
     
-    // ==============================
-    // Category Colors & Legend
-    // ==============================
+    /******** Category Colors & Legend ********/
     const categoryColors = {
       "Parks and Green Spaces": "limegreen",
       "Housing": "orange",
@@ -411,13 +354,9 @@ map.setView([39.9362, -75.1956], 16);
       });
       return div;
     };
-    
-    // Global object for legend icons
     const categoryIcons = {};
     
-    // ==============================
-    // Data Fetch & Marker Creation
-    // ==============================
+    /******** Data Fetch & Marker Creation ********/
     var apiUrl = "https://script.google.com/macros/s/AKfycbzyrIcLZaFyYhwUGviH9bYw5GOzKGooPomy2arJmi2D4V-G8-QF-yME-gqcnaSHUeDYVA/exec";
     fetch(apiUrl)
       .then(response => response.json())
@@ -425,13 +364,14 @@ map.setView([39.9362, -75.1956], 16);
         allLocations = data;
         data.forEach((location, index) => {
           if (!location.X || !location.Y) return;
-          // Use "Category/Layer" or fallback
+          
+          // Determine category (or fallback).
           let category = location["Category/Layer"] ? location["Category/Layer"].trim() : "Uncategorized Site";
-          // Store category icon for legend (if available)
+          // Save marker icon for the legend if available.
           if (!categoryIcons[category] && location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")) {
             categoryIcons[category] = convertGoogleDriveImageLink(location["Marker Icon"]);
           }
-          // Create marker icon
+          // Create marker using either the custom icon image or a colored circle.
           let customIcon = location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")
             ? L.icon({
                 iconUrl: convertGoogleDriveImageLink(location["Marker Icon"]),
@@ -444,7 +384,6 @@ map.setView([39.9362, -75.1956], 16);
                 html: `<div style="background:${categoryColors[category]}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #333;"></div>`
               });
           let marker = L.marker([parseFloat(location.X), parseFloat(location.Y)], { icon: customIcon });
-          // On marker click, update the sidebar with point details
           marker.on('click', () => {
             updateSidebar(location, allLocations.indexOf(location));
           });
@@ -454,18 +393,13 @@ map.setView([39.9362, -75.1956], 16);
         legend.addTo(map);
       })
       .catch(error => console.error("Error fetching data:", error));
-    
-    // ==============================
-    // Sidebar Update Function
-    // ==============================
+      
+    /******** Sidebar & Carousel Functions ********/
     function updateSidebar(location, index) {
       currentIndex = index;
       document.getElementById("sidebar").classList.add("visible");
-      
-      // Update text fields
       document.getElementById("sidebar-title").textContent = location.Name || "";
       document.getElementById("sidebar-address").textContent = location.Address || "";
-      // Choose which text to show (Document or Text)
       document.getElementById("sidebar-text").innerHTML = location.Document || location.Text || "";
       document.getElementById("sidebar-contributor").textContent = location["Contributed by"] ? "Contributed by: " + location["Contributed by"] : "";
       
@@ -478,103 +412,109 @@ map.setView([39.9362, -75.1956], 16);
         document.getElementById("sidebar-audio").style.display = "none";
       }
       
-      // Build Image Carousel:
-      // Use exact column names "Image 1", "Image 2", etc.
-      imagesArray = [];
+      // ===== Build Unified Carousel Items (Images & Videos) =====
+      carouselItems = [];
+      // Check for images (Image 1 to Image 14)
       for (let i = 1; i <= 14; i++) {
-        const imageKey = "Image " + i; // Ensure this matches your spreadsheet header exactly
+        const imageKey = "Image " + i;
         if (location[imageKey]) {
-          imagesArray.push({
+          carouselItems.push({
+            type: "image",
             url: convertGoogleDriveImageLink(location[imageKey]),
             desc: location[imageKey + " Description"] || ""
           });
         }
       }
-      buildCarousel(imagesArray);
-      
-      // Build Video Section:
-      const videoSection = document.getElementById("videoSection");
-      videoSection.innerHTML = "";
+      // Check for a video and add to the array
       if (location.Video) {
         let videoId = extractYouTubeID(location.Video);
         if (videoId) {
-          let iframe = document.createElement("iframe");
-          iframe.width = "100%";
-          iframe.height = "200";
-          iframe.src = "https://www.youtube-nocookie.com/embed/" + videoId;
-          iframe.frameBorder = "0";
-          iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-          iframe.allowFullscreen = true;
-          let videoDiv = document.createElement("div");
-          videoDiv.className = "video-container";
-          videoDiv.appendChild(iframe);
-          if (location["Video Description"]) {
-            let vidDesc = document.createElement("p");
-            vidDesc.textContent = location["Video Description"];
-            vidDesc.style.fontSize = "0.9em";
-            vidDesc.style.color = "#555";
-            videoDiv.appendChild(vidDesc);
-          }
-          videoSection.appendChild(videoDiv);
+          carouselItems.push({
+            type: "video",
+            youtubeId: videoId,
+            desc: location["Video Description"] || ""
+          });
         }
       }
       
-      // Update global point counter
+      // Build the carousel with our unified media items.
+      buildCarousel(carouselItems);
       updatePointCounter();
-      
       console.log("Sidebar updated for:", location);
     }
     
-    // ==============================
-    // Carousel Functions (Images)
-    // ==============================
-    function buildCarousel(imgArray) {
-      const mainImage = document.getElementById("mainImage");
-      const carouselCounter = document.getElementById("carouselCounter");
+    function buildCarousel(items) {
       const thumbnailsContainer = document.getElementById("carouselThumbnails");
       thumbnailsContainer.innerHTML = "";
       
-      if (imgArray.length === 0) {
-        mainImage.src = "";
-        carouselCounter.textContent = "No images available";
-        return;
-      }
+if (items.length === 0) {
+  document.getElementById("mainImage").src = "";
+  document.getElementById("mainImage").style.display = "none";
+  document.getElementById("mainVideo").src = "";
+  document.getElementById("mainVideo").style.display = "none";
+  
+  // Clear the old caption:
+  document.getElementById("mediaCaption").textContent = "";
+  
+  document.getElementById("carouselCounter").textContent = "No media available";
+  return;
+}
+
+      currentMediaIndex = 0;
+      showMedia(currentMediaIndex);
       
-      currentImgIndex = 0;
-      showImage(currentImgIndex);
-      
-      // Build thumbnails
-      imgArray.forEach((imgObj, idx) => {
+      // Build thumbnails for each item.
+      items.forEach((item, idx) => {
         let thumb = document.createElement("img");
-        thumb.src = imgObj.url;
-        thumb.onclick = () => showImage(idx);
+        if (item.type === "image") {
+          thumb.src = item.url;
+        } else if (item.type === "video") {
+          thumb.src = `https://img.youtube.com/vi/${item.youtubeId}/0.jpg`;
+        }
+        thumb.onclick = () => showMedia(idx);
         thumbnailsContainer.appendChild(thumb);
       });
     }
     
-    function showImage(index) {
-      if (imagesArray.length === 0) return;
-      currentImgIndex = (index + imagesArray.length) % imagesArray.length;
-      document.getElementById("mainImage").src = imagesArray[currentImgIndex].url;
-      document.getElementById("carouselCounter").textContent = (currentImgIndex + 1) + " of " + imagesArray.length;
+    function showMedia(index) {
+      if (carouselItems.length === 0) return;
+      currentMediaIndex = (index + carouselItems.length) % carouselItems.length;
+      const item = carouselItems[currentMediaIndex];
+      const mainImage = document.getElementById("mainImage");
+      const mainVideo = document.getElementById("mainVideo");
+      const captionEl = document.getElementById("mediaCaption");
       
-      // Highlight active thumbnail
+      // Clear any existing video to stop playback.
+      mainVideo.src = "";
+      mainImage.style.display = "none";
+      mainVideo.style.display = "none";
+      
+      if (item.type === "image") {
+        mainImage.src = item.url;
+        mainImage.style.display = "block";
+      } else if (item.type === "video") {
+        mainVideo.src = "https://www.youtube-nocookie.com/embed/" + item.youtubeId;
+        mainVideo.style.display = "block";
+      }
+      
+      captionEl.textContent = item.desc || "";
+      document.getElementById("carouselCounter").textContent =
+        (currentMediaIndex + 1) + " of " + carouselItems.length;
+      
+      // Update thumbnail highlighting.
       const thumbs = document.getElementById("carouselThumbnails").querySelectorAll("img");
       thumbs.forEach((thumb, idx) => {
-        thumb.classList.toggle("active-thumb", idx === currentImgIndex);
+        thumb.classList.toggle("active-thumb", idx === currentMediaIndex);
       });
     }
     
-    function nextImage() {
-      showImage(currentImgIndex + 1);
+    function nextMedia() {
+      showMedia(currentMediaIndex + 1);
     }
-    function prevImage() {
-      showImage(currentImgIndex - 1);
+    function prevMedia() {
+      showMedia(currentMediaIndex - 1);
     }
     
-    // ==============================
-    // Global Sidebar (Point) Navigation
-    // ==============================
     function nextPoint() {
       let nextIndex = (currentIndex + 1) % allLocations.length;
       updateSidebar(allLocations[nextIndex], nextIndex);
@@ -589,9 +529,6 @@ map.setView([39.9362, -75.1956], 16);
       document.getElementById("pointCounter").textContent = (currentIndex + 1) + " of " + allLocations.length;
     }
     
-    // ==============================
-    // Sidebar Close Function
-    // ==============================
     function closeSidebar() {
       document.getElementById("sidebar").classList.remove("visible");
     }
