@@ -430,13 +430,22 @@
 	  document.getElementById("sidebar-address").innerHTML = location.Address
       ? `<span style="font-weight:500; color:#555;">📍 Address:</span> ${location.Address}`
       : "";
-// Clean and format the description text
 const rawText = location.Document || location.Text || "";
 const formattedText = rawText
-  .split(/\n\s*\n+/) // Split at double line breaks (paragraphs)
-  .map(para => `<p>${para.trim()}</p>`) // Wrap each in <p> tags
+  .split(/\n\s*\n+/) // Break into paragraphs
+  .map(para => {
+    const trimmed = para.trim();
+
+    // If the paragraph starts with a quote or contains "et al." or ends in a citation-like period
+    if (/^["“].+["”]$/.test(trimmed) || /et al\./i.test(trimmed) || /\(\s*.*\s*\)/.test(trimmed)) {
+      return `<blockquote>${trimmed}</blockquote>`;
+    }
+
+    return `<p>${trimmed}</p>`;
+  })
   .join("");
 document.getElementById("sidebar-text").innerHTML = formattedText;
+
       document.getElementById("sidebar-contributor").textContent = location["Contributed by"] ? "Contributed by: " + location["Contributed by"] : "";
       
       // Handle Audio (if available)
