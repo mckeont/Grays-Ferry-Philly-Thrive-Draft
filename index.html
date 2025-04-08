@@ -163,6 +163,34 @@
       text-align: right;
       opacity: 0.8;
     }
+	
+	#sidebar-address {
+  font-size: 0.95em;
+  margin-top: 8px;
+}
+
+#sidebar-text {
+  font-size: 0.95em;
+  font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1.6;
+  color: #333;
+  padding: 4px 0;
+}
+
+#sidebar-text p {
+  text-indent: 1.25em;
+  margin-bottom: 1em;
+}
+#sidebar-text blockquote {
+  margin: 10px 0;
+  padding-left: 12px;
+  border-left: 3px solid #ccc;
+  color: #666;
+  font-style: italic;
+}
+
+
+
     
     /* ===== Legend Styles ===== */
     .legend {
@@ -399,7 +427,9 @@
       currentIndex = index;
       document.getElementById("sidebar").classList.add("visible");
       document.getElementById("sidebar-title").textContent = location.Name || "";
-      document.getElementById("sidebar-address").textContent = location.Address || "";
+	  document.getElementById("sidebar-address").innerHTML = location.Address
+      ? `<span style="font-weight:500; color:#555;">📍 Address:</span> ${location.Address}`
+      : "";
       document.getElementById("sidebar-text").innerHTML = location.Document || location.Text || "";
       document.getElementById("sidebar-contributor").textContent = location["Contributed by"] ? "Contributed by: " + location["Contributed by"] : "";
       
