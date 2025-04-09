@@ -43,6 +43,11 @@
     #sidebar.visible {
       transform: translateX(0);
     }
+	
+	#sidebar-tab {
+  pointer-events: auto;
+}
+
     .close-btn {
       position: absolute;
       top: 10px; right: 10px;
@@ -169,6 +174,12 @@
   margin-top: 8px;
 }
 
+#sidebar-text p:first-of-type {
+  font-weight: 500;
+  color: #222;
+}
+
+
 #sidebar-text {
   font-size: 0.95em;
   font-family: Georgia, 'Times New Roman', serif;
@@ -189,6 +200,67 @@
   font-style: italic;
 }
 
+#sidebar-tab.hidden {
+  display: none;
+}
+
+
+#sidebar-audio {
+  margin-top: 12px;
+  border-radius: 4px;
+  background: #f9f9f9;
+  padding: 6px;
+  box-shadow: 0 0 3px rgba(0,0,0,0.1);
+}
+
+/* Make the toggle a small, rectangular button at the top-right */
+#sidebar-tab {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+
+  /* Smaller + rectangular dimensions */
+  width: 40px;      /* wider rectangle */
+  height: 18px;     /* short height */
+
+  background: #f06292; /* change to any color you like (pink here) */
+  color: #fff;
+  border-radius: 4px;  /* subtle rounding for a rectangular shape */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+#sidebar-tab:hover {
+  background: #ec407a; /* hover color (a slightly darker pink) */
+}
+
+/* Slightly smaller SVG icon, so it fits the narrower rectangle */
+#sidebar-tab svg {
+  width: 16px; 
+  height: 16px;
+  stroke: white; /* keeps the arrow white */
+  transition: transform 0.3s ease;
+}
+
+
+
+#sidebar-tab svg {
+  width: 20px;
+  height: 20px;
+  stroke: white;
+}
+
+#sidebar-tab svg:hover {
+  stroke: #ddd;
+}
+
+
+#sidebar-tab.collapsed {
+  right: 0;
+}
 
 
     
@@ -208,13 +280,34 @@
       margin-right: 8px;
       opacity: 0.7;
     }
+	
+	.leaflet-popup.active-label {
+  background-color: #fff;
+  color: #333;
+  border-radius: 6px;
+  font-weight: 600;
+  padding: 4px 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  border: none;
+}
+.leaflet-popup-content-wrapper {
+  padding: 0;
+}
+.leaflet-popup-content {
+  margin: 6px;
+}
+
+#sidebar-tab svg:hover {
+  stroke: #ddd;
+}
+
+
   </style>
 </head>
 <body>
   <div id="map"></div>
   
   <div id="sidebar">
-    <button class="close-btn" onclick="closeSidebar()">×</button>
     <div class="scrollable-content">
       <div class="point-header">
         <button class="nav-button" onclick="prevPoint()" title="Previous Location">&#10094;</button>
@@ -256,7 +349,12 @@
       <div id="sidebar-contributor" class="section"></div>
     </div>
   </div>
-  
+<div id="sidebar-tab" onclick="toggleSidebar()" title="Toggle Sidebar">
+  <svg id="toggleIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+    <path id="togglePath" d="M15 6l-6 6 6 6"/>
+  </svg>
+</div>
+
   <script>
     /******** Global Variables & Helper Functions ********/
     let allLocations = [];
@@ -264,6 +362,8 @@
     let markersArray = [];
     let carouselItems = []; // Unified array for images and videos
     let currentMediaIndex = 0;
+	let activePopup = null;
+
     
     // Convert a Google Drive URL into a direct thumbnail link.
     function convertGoogleDriveImageLink(url) {
@@ -423,27 +523,30 @@
       .catch(error => console.error("Error fetching data:", error));
       
     /******** Sidebar & Carousel Functions ********/
+
     function updateSidebar(location, index) {
       currentIndex = index;
       document.getElementById("sidebar").classList.add("visible");
+	  const tab = document.getElementById("sidebar-tab");
+      tab.innerHTML = '◀';
       document.getElementById("sidebar-title").textContent = location.Name || "";
 	  document.getElementById("sidebar-address").innerHTML = location.Address
       ? `<span style="font-weight:500; color:#555;">📍 Address:</span> ${location.Address}`
       : "";
 const rawText = location.Document || location.Text || "";
 const formattedText = rawText
-  .split(/\n\s*\n+/) // Break into paragraphs
+  .split(/\n\s*\n+/)
   .map(para => {
     const trimmed = para.trim();
+    const withEmphasis = emphasizeKeywords(trimmed);
 
-    // If the paragraph starts with a quote or contains "et al." or ends in a citation-like period
     if (/^["“].+["”]$/.test(trimmed) || /et al\./i.test(trimmed) || /\(\s*.*\s*\)/.test(trimmed)) {
-      return `<blockquote>${trimmed}</blockquote>`;
+      return `<blockquote>${withEmphasis}</blockquote>`;
     }
-
-    return `<p>${trimmed}</p>`;
+    return `<p>${withEmphasis}</p>`;
   })
   .join("");
+
 document.getElementById("sidebar-text").innerHTML = formattedText;
 
       document.getElementById("sidebar-contributor").textContent = location["Contributed by"] ? "Contributed by: " + location["Contributed by"] : "";
@@ -485,6 +588,27 @@ document.getElementById("sidebar-text").innerHTML = formattedText;
       // Build the carousel with our unified media items.
       buildCarousel(carouselItems);
       updatePointCounter();
+	  // Build the carousel with our unified media items.
+buildCarousel(carouselItems);
+updatePointCounter();
+
+// ⬇️ Add this here
+map.panTo([parseFloat(location.X), parseFloat(location.Y)]);
+if (activePopup) {
+  map.removeLayer(activePopup);
+}
+activePopup = L.popup({
+  closeButton: false,
+  offset: L.point(0, -30),
+  autoPan: false,
+  className: 'active-label'
+})
+  .setLatLng([parseFloat(location.X), parseFloat(location.Y)])
+  .setContent(`<strong>${location.Name}</strong>`)
+  .openOn(map);
+
+console.log("Sidebar updated for:", location);
+
       console.log("Sidebar updated for:", location);
     }
     
@@ -563,12 +687,10 @@ if (items.length === 0) {
     function nextPoint() {
       let nextIndex = (currentIndex + 1) % allLocations.length;
       updateSidebar(allLocations[nextIndex], nextIndex);
-      map.panTo([allLocations[nextIndex].X, allLocations[nextIndex].Y]);
     }
     function prevPoint() {
       let prevIndex = (currentIndex - 1 + allLocations.length) % allLocations.length;
       updateSidebar(allLocations[prevIndex], prevIndex);
-      map.panTo([allLocations[prevIndex].X, allLocations[prevIndex].Y]);
     }
     function updatePointCounter() {
       document.getElementById("pointCounter").textContent = (currentIndex + 1) + " of " + allLocations.length;
@@ -577,6 +699,27 @@ if (items.length === 0) {
     function closeSidebar() {
       document.getElementById("sidebar").classList.remove("visible");
     }
+	
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  const toggleIcon = document.getElementById("toggleIcon");
+  const isOpen = sidebar.classList.contains("visible");
+
+  if (isOpen) {
+    sidebar.classList.remove("visible");
+    // Rotate to 0 degrees (arrow will point right indicating "open sidebar")
+    toggleIcon.style.transform = "rotate(0deg)";
+  } else {
+    sidebar.classList.add("visible");
+    // Rotate to 180 degrees (arrow will point left indicating "close sidebar")
+    toggleIcon.style.transform = "rotate(180deg)";
+  }
+}
+	function emphasizeKeywords(text) {
+  return text
+    .replace(/\b(PHA|HAC|EPA|Jane Golden|Mural Arts)\b/g, '<strong>$1</strong>');
+}
+
   </script>
 </body>
 </html>
