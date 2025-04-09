@@ -307,48 +307,68 @@
 <body>
   <div id="map"></div>
   
-  <div id="sidebar">
-    <div class="scrollable-content">
+<div id="sidebar">
+  <div class="scrollable-content">
+
+    <!-- ✨ New welcome content -->
+    <div id="sidebar-intro">
+      <h2 style="text-align:center; color:#4a148c;">Welcome to Grays Ferry</h2>
+      <p style="text-align:center; color:#444; margin: 10px 0 15px;">
+        Click a point on the map to explore stories, struggles, and strength from the neighborhood.
+      </p>
+<div style="height: 140px; background-color: #f5f5f5;
+            background-image: repeating-linear-gradient(
+              45deg,
+              #e0e0e0,
+              #e0e0e0 2px,
+              #f5f5f5 2px,
+              #f5f5f5 10px
+            );
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 4px rgba(0,0,0,0.1);">
+  <span style="color: #444; font-size: 1em; font-style: italic;">Explore Community Stories</span>
+</div>
+    </div>
+
+    <!-- 🔁 Your original sidebar content wrapped in a hidden container -->
+    <div id="sidebar-content" style="display: none;">
       <div class="point-header">
         <button class="nav-button" onclick="prevPoint()" title="Previous Location">&#10094;</button>
         <h2 id="sidebar-title">Title</h2>
         <button class="nav-button" onclick="nextPoint()" title="Next Location">&#10095;</button>
       </div>
       <div id="pointCounter" class="point-counter"></div>
-      
-      <!-- ===== Unified Carousel Container ===== -->
+
+      <!-- Unified Carousel -->
       <div class="carousel-main" id="carouselMainContainer">
-        <!-- Main media elements (image or video) -->
         <img id="mainImage" style="display: none;" alt="Main Media">
         <iframe id="mainVideo" style="display: none;" width="100%" height="200" frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
         </iframe>
-        <!-- Media caption -->
         <div id="mediaCaption" style="margin-top:4px; font-size:0.9em; color:#555;"></div>
-        <!-- Carousel counter -->
         <div class="carousel-counter" id="carouselCounter">0 of 0</div>
-        <!-- Navigation arrows -->
         <div class="carousel-arrows">
           <button class="carousel-arrow" onclick="prevMedia()">&#10094;</button>
           <button class="carousel-arrow" onclick="nextMedia()">&#10095;</button>
         </div>
       </div>
-      
-      <!-- Thumbnails for carousel items -->
+
       <div class="carousel-thumbnails" id="carouselThumbnails"></div>
-      
       <p id="sidebar-address"></p>
       <div id="sidebar-text" class="section"></div>
-      
-      <!-- Optional: Audio (if available) -->
+
       <audio controls id="sidebar-audio" style="display: none; width: 100%;">
         <source id="audio-src" src="" type="audio/mpeg">
         Your browser does not support the audio element.
       </audio>
-      
+
       <div id="sidebar-contributor" class="section"></div>
-    </div>
-  </div>
+    </div> <!-- end #sidebar-content -->
+
+  </div> <!-- end .scrollable-content -->
+</div>
+
 <div id="sidebar-tab" onclick="toggleSidebar()" title="Toggle Sidebar">
   <svg id="toggleIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
     <path id="togglePath" d="M15 6l-6 6 6 6"/>
@@ -518,18 +538,24 @@
           markersArray.push(marker);
         });
         L.layerGroup(markersArray).addTo(map);
+		// updateSidebar(allLocations[0], 0);
         legend.addTo(map);
       })
       .catch(error => console.error("Error fetching data:", error));
       
     /******** Sidebar & Carousel Functions ********/
 
-    function updateSidebar(location, index) {
-      currentIndex = index;
+function updateSidebar(location, index) {
+  currentIndex = index;
+
+  // 👇 New toggle: hide intro, show content
+  document.getElementById("sidebar-intro").style.display = "none";
+  document.getElementById("sidebar-content").style.display = "block";
+
       document.getElementById("sidebar").classList.add("visible");
 	  const tab = document.getElementById("sidebar-tab");
       tab.innerHTML = '◀';
-      document.getElementById("sidebar-title").textContent = location.Name || "";
+	  document.getElementById("sidebar-title").textContent = location?.Name || "Untitled";
 	  document.getElementById("sidebar-address").innerHTML = location.Address
       ? `<span style="font-weight:500; color:#555;">📍 Address:</span> ${location.Address}`
       : "";
@@ -644,6 +670,15 @@ if (items.length === 0) {
         thumbnailsContainer.appendChild(thumb);
       });
     }
+	
+	document.addEventListener('keydown', function(e) {
+  if (document.getElementById("sidebar").classList.contains("visible")) {
+    if (e.key === "ArrowRight") nextMedia();
+    else if (e.key === "ArrowLeft") prevMedia();
+    else if (e.key === "Escape") toggleSidebar();
+  }
+});
+
     
     function showMedia(index) {
       if (carouselItems.length === 0) return;
@@ -715,6 +750,8 @@ function toggleSidebar() {
     toggleIcon.style.transform = "rotate(180deg)";
   }
 }
+
+	
 	function emphasizeKeywords(text) {
   return text
     .replace(/\b(PHA|HAC|EPA|Jane Golden|Mural Arts)\b/g, '<strong>$1</strong>');
