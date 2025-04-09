@@ -3,21 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Philly Thrive | Grays Ferry Community Map</title>
-  
-  <!-- Leaflet CSS & JS -->
+  <title>Philly Thrive Map with Unified Carousel</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  
-  <!-- Optional: MarkerCluster (if using) -->
   <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css">
-  
   <meta http-equiv="Content-Language" content="en">
   <meta name="google" content="notranslate">
-  
   <style>
-    /* ===== Basic Map & Body Styles ===== */
     html, body {
       margin: 0; padding: 0;
       height: 100vh; overflow: hidden;
@@ -25,8 +18,6 @@
     #map {
       width: 100%; height: 100vh;
     }
-    
-    /* ===== Sidebar Styles ===== */
     #sidebar {
       position: absolute;
       top: 0; right: 0;
@@ -45,7 +36,6 @@
     #sidebar.visible {
       transform: translateX(0);
     }
-    
     #sidebar-tab {
       pointer-events: auto;
     }
@@ -94,8 +84,6 @@
       font-weight: bold;
       color: #333;
     }
-    
-    /* ===== Carousel Styles ===== */
     .carousel-main {
       position: relative;
       text-align: center;
@@ -153,8 +141,6 @@
       border: 2px solid #4a148c;
       opacity: 1;
     }
-    
-    /* ===== Other Sidebar Content Styles ===== */
     #sidebar h2 {
       margin-top: 10px;
     }
@@ -209,8 +195,6 @@
       padding: 6px;
       box-shadow: 0 0 3px rgba(0,0,0,0.1);
     }
-    
-    /* ===== Sidebar Toggle Button ===== */
     #sidebar-tab {
       position: fixed;
       top: 10px;
@@ -242,8 +226,6 @@
     #sidebar-tab.collapsed {
       right: 0;
     }
-    
-    /* ===== Legend Styles ===== */
     .legend {
       background: white;
       padding: 10px;
@@ -275,8 +257,6 @@
     .leaflet-popup-content {
       margin: 6px;
     }
-    
-    /* ===== Media Queries for Mobile ===== */
     @media (max-width: 600px) {
       #sidebar {
         width: 100vw;
@@ -295,11 +275,8 @@
 </head>
 <body>
   <div id="map"></div>
-  
   <div id="sidebar">
     <div class="scrollable-content">
-  
-      <!-- ✨ New welcome content -->
       <div id="sidebar-intro">
         <h2 style="text-align:center; color:#4a148c;">Welcome to Grays Ferry</h2>
         <p style="text-align:center; color:#444; margin: 10px 0 15px;">
@@ -322,8 +299,6 @@
           </span>
         </div>
       </div>
-  
-      <!-- 🔁 Original sidebar content (hidden initially) -->
       <div id="sidebar-content" style="display: none;">
         <div class="point-header">
           <button class="nav-button" onclick="prevPoint()" title="Previous Location">&#10094;</button>
@@ -331,8 +306,6 @@
           <button class="nav-button" onclick="nextPoint()" title="Next Location">&#10095;</button>
         </div>
         <div id="pointCounter" class="point-counter"></div>
-  
-        <!-- Unified Carousel -->
         <div class="carousel-main" id="carouselMainContainer">
           <img id="mainImage" style="display: none;" alt="Main Media">
           <iframe id="mainVideo" style="display: none;" width="100%" height="200" frameborder="0"
@@ -345,38 +318,29 @@
             <button class="carousel-arrow" onclick="nextMedia()">&#10095;</button>
           </div>
         </div>
-  
         <div class="carousel-thumbnails" id="carouselThumbnails"></div>
         <p id="sidebar-address"></p>
         <div id="sidebar-text" class="section"></div>
-  
         <audio controls id="sidebar-audio" style="display: none; width: 100%;">
           <source id="audio-src" src="" type="audio/mpeg">
           Your browser does not support the audio element.
         </audio>
-  
         <div id="sidebar-contributor" class="section"></div>
-      </div> <!-- end #sidebar-content -->
-  
-    </div> <!-- end .scrollable-content -->
+      </div>
+    </div>
   </div>
-  
   <div id="sidebar-tab" onclick="toggleSidebar()" title="Toggle Sidebar">
     <svg id="toggleIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
       <path id="togglePath" d="M15 6l-6 6 6 6"/>
     </svg>
   </div>
-  
   <script>
-    /******** Global Variables & Helper Functions ********/
     let allLocations = [];
     let currentIndex = 0;
     let markersArray = [];
-    let carouselItems = []; // Unified array for images and videos
+    let carouselItems = [];
     let currentMediaIndex = 0;
     let activePopup = null;
-    
-    // Convert a Google Drive URL into a direct thumbnail link.
     function convertGoogleDriveImageLink(url) {
       let match = url.match(/(?:\/d\/|id=)([a-zA-Z0-9-_]+)/);
       if (match) {
@@ -385,8 +349,6 @@
       }
       return url;
     }
-    
-    // Extract a YouTube Video ID from various URL formats.
     function extractYouTubeID(url) {
       try {
         const parsed = new URL(url);
@@ -401,12 +363,10 @@
       }
       return null;
     }
-    
-    /******** Map Initialization ********/
     const cartoVoyagerLabels = L.tileLayer(
       'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',
       {
-        attribution: 'Labels © OpenStreetMap contributors, © CARTO',
+        attribution: 'Street Labels © OpenStreetMap',
         subdomains: 'abcd',
         maxZoom: 19,
         pane: 'labelsPane'
@@ -414,7 +374,7 @@
     );
     const cartoVoyagerNoLabels = L.tileLayer(
       'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',
-      { attribution: '&copy; CARTO', subdomains: 'abcd', maxZoom: 19 }
+      { attribution: '&copy; CARTO, tpmckeon', subdomains: 'abcd', maxZoom: 19 }
     );
     const googleStreets = L.tileLayer(
       'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
@@ -424,7 +384,7 @@
       "Google Streets": googleStreets,
       "Esri World Imagery": L.tileLayer(
         'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        { attribution: '&copy; Esri' }
+        { attribution: '&copy; Esri, tpmckeon' }
       ),
       "Carto Voyager (No Labels)": cartoVoyagerNoLabels
     };
@@ -439,14 +399,10 @@
       maxZoom: 20
     });
     map.setView([39.9362, -75.1956], 16);
-    
-    // Create a pane for labels to appear above markers.
     map.createPane('labelsPane');
     map.getPane('labelsPane').style.zIndex = 650;
     map.getPane('labelsPane').style.pointerEvents = 'none';
     cartoVoyagerLabels.addTo(map);
-    
-    // Optional: Add a historic image overlay.
     const imageUrl = 'jbrew1934.png';
     const imageBounds = [
       [39.903605, -75.235695],
@@ -458,8 +414,7 @@
       "Street Labels": cartoVoyagerLabels
     };
     L.control.layers(basemaps, overlays, { position: "topleft" }).addTo(map);
-    
-    /******** Category Colors & Legend ********/
+
     const categoryColors = {
       "Parks and Green Spaces": "limegreen",
       "Housing": "orange",
@@ -494,8 +449,7 @@
       return div;
     };
     const categoryIcons = {};
-    
-    /******** Data Fetch & Marker Creation ********/
+
     const apiUrl = "https://script.google.com/macros/s/AKfycbzyrIcLZaFyYhwUGviH9bYw5GOzKGooPomy2arJmi2D4V-G8-QF-yME-gqcnaSHUeDYVA/exec";
     fetch(apiUrl)
       .then(response => response.json())
@@ -503,14 +457,10 @@
         allLocations = data;
         data.forEach((location, index) => {
           if (!location.X || !location.Y) return;
-          
-          // Determine category (or fallback).
           const category = location["Category/Layer"] ? location["Category/Layer"].trim() : "Uncategorized Site";
-          // Save marker icon for the legend if available.
           if (!categoryIcons[category] && location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")) {
             categoryIcons[category] = convertGoogleDriveImageLink(location["Marker Icon"]);
           }
-          // Create marker using either the custom icon image or a colored circle.
           const customIcon = location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")
             ? L.icon({
                 iconUrl: convertGoogleDriveImageLink(location["Marker Icon"]),
@@ -529,18 +479,11 @@
           markersArray.push(marker);
         });
         L.layerGroup(markersArray).addTo(map);
-        // Uncomment the line below to auto-load the first location in the sidebar:
-        // updateSidebar(allLocations[0], 0);
         legend.addTo(map);
       })
       .catch(error => console.error("Error fetching data:", error));
-      
-    /******** Sidebar & Carousel Functions ********/
-    
     function updateSidebar(location, index) {
       currentIndex = index;
-  
-      // Hide intro, show content
       document.getElementById("sidebar-intro").style.display = "none";
       document.getElementById("sidebar-content").style.display = "block";
       document.getElementById("sidebar").classList.add("visible");
@@ -574,7 +517,6 @@
         document.getElementById("sidebar-audio").style.display = "none";
       }
       
-      // Build Unified Carousel Items (Images & Videos)
       carouselItems = [];
       for (let i = 1; i <= 14; i++) {
         const imageKey = "Image " + i;
@@ -630,8 +572,7 @@
       }
       currentMediaIndex = 0;
       showMedia(currentMediaIndex);
-  
-      // Build thumbnails for each item.
+	  
       items.forEach((item, idx) => {
         const thumb = document.createElement("img");
         thumb.src = item.type === "image" ? item.url : `https://img.youtube.com/vi/${item.youtubeId}/0.jpg`;
@@ -648,7 +589,6 @@
       const mainVideo = document.getElementById("mainVideo");
       const captionEl = document.getElementById("mediaCaption");
       
-      // Clear any existing video to stop playback.
       mainVideo.src = "";
       mainImage.style.display = "none";
       mainVideo.style.display = "none";
@@ -662,8 +602,7 @@
       }
       captionEl.textContent = item.desc || "";
       document.getElementById("carouselCounter").textContent = (currentMediaIndex + 1) + " of " + carouselItems.length;
-  
-      // Update thumbnail highlighting.
+
       const thumbs = document.getElementById("carouselThumbnails").querySelectorAll("img");
       thumbs.forEach((thumb, idx) => {
         thumb.classList.toggle("active-thumb", idx === currentMediaIndex);
@@ -711,7 +650,6 @@
       return text.replace(/\b(PHA|HAC|EPA|Jane Golden|Mural Arts)\b/g, '<strong>$1</strong>');
     }
     
-    // Keyboard navigation for carousel and sidebar toggle
     document.addEventListener('keydown', function(e) {
       if (document.getElementById("sidebar").classList.contains("visible")) {
         if (e.key === "ArrowRight") nextMedia();
