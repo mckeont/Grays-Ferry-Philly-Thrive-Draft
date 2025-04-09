@@ -30,7 +30,9 @@
     #sidebar {
       position: absolute;
       top: 0; right: 0;
-      width: 350px; height: 100%;
+      width: 100%;
+      max-width: 350px;
+      height: 100%;
       background: #fff;
       box-shadow: -2px 0 5px rgba(0,0,0,0.3);
       padding: 20px;
@@ -43,11 +45,10 @@
     #sidebar.visible {
       transform: translateX(0);
     }
-	
-	#sidebar-tab {
-  pointer-events: auto;
-}
-
+    
+    #sidebar-tab {
+      pointer-events: auto;
+    }
     .close-btn {
       position: absolute;
       top: 10px; right: 10px;
@@ -58,6 +59,7 @@
       flex-grow: 1;
       overflow-y: auto;
       padding-bottom: 20px;
+      -webkit-overflow-scrolling: touch;
     }
     .point-header {
       display: flex;
@@ -168,101 +170,78 @@
       text-align: right;
       opacity: 0.8;
     }
-	
-	#sidebar-address {
-  font-size: 0.95em;
-  margin-top: 8px;
-}
-
-#sidebar-text p:first-of-type {
-  font-weight: 500;
-  color: #222;
-}
-
-
-#sidebar-text {
-  font-size: 0.95em;
-  font-family: Georgia, 'Times New Roman', serif;
-  line-height: 1.6;
-  color: #333;
-  padding: 4px 0;
-}
-
-#sidebar-text p {
-  text-indent: 1.25em;
-  margin-bottom: 1em;
-}
-#sidebar-text blockquote {
-  margin: 10px 0;
-  padding-left: 12px;
-  border-left: 3px solid #ccc;
-  color: #666;
-  font-style: italic;
-}
-
-#sidebar-tab.hidden {
-  display: none;
-}
-
-
-#sidebar-audio {
-  margin-top: 12px;
-  border-radius: 4px;
-  background: #f9f9f9;
-  padding: 6px;
-  box-shadow: 0 0 3px rgba(0,0,0,0.1);
-}
-
-/* Make the toggle a small, rectangular button at the top-right */
-#sidebar-tab {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-
-  /* Smaller + rectangular dimensions */
-  width: 40px;      /* wider rectangle */
-  height: 18px;     /* short height */
-
-  background: #f06292; /* change to any color you like (pink here) */
-  color: #fff;
-  border-radius: 4px;  /* subtle rounding for a rectangular shape */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1100;
-  cursor: pointer;
-  transition: background 0.3s ease, transform 0.3s ease;
-}
-#sidebar-tab:hover {
-  background: #ec407a; /* hover color (a slightly darker pink) */
-}
-
-/* Slightly smaller SVG icon, so it fits the narrower rectangle */
-#sidebar-tab svg {
-  width: 16px; 
-  height: 16px;
-  stroke: white; /* keeps the arrow white */
-  transition: transform 0.3s ease;
-}
-
-
-
-#sidebar-tab svg {
-  width: 20px;
-  height: 20px;
-  stroke: white;
-}
-
-#sidebar-tab svg:hover {
-  stroke: #ddd;
-}
-
-
-#sidebar-tab.collapsed {
-  right: 0;
-}
-
-
+    #sidebar-address {
+      font-size: 0.95em;
+      margin-top: 8px;
+    }
+    #sidebar-text p:first-of-type {
+      font-weight: 500;
+      color: #222;
+    }
+    
+    #sidebar-text {
+      font-size: 0.95em;
+      font-family: Georgia, 'Times New Roman', serif;
+      line-height: 1.6;
+      color: #333;
+      padding: 4px 0;
+    }
+    #sidebar-text p {
+      text-indent: 1.25em;
+      margin-bottom: 1em;
+    }
+    #sidebar-text blockquote {
+      margin: 10px 0;
+      padding-left: 12px;
+      border-left: 3px solid #ccc;
+      color: #666;
+      font-style: italic;
+    }
+    
+    #sidebar-tab.hidden {
+      display: none;
+    }
+    
+    #sidebar-audio {
+      margin-top: 12px;
+      border-radius: 4px;
+      background: #f9f9f9;
+      padding: 6px;
+      box-shadow: 0 0 3px rgba(0,0,0,0.1);
+    }
+    
+    /* ===== Sidebar Toggle Button ===== */
+    #sidebar-tab {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      width: 40px;
+      height: 18px;
+      background: #f06292;
+      color: #fff;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1100;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+    #sidebar-tab:hover {
+      background: #ec407a;
+    }
+    #sidebar-tab svg {
+      width: 20px;
+      height: 20px;
+      stroke: white;
+      transition: transform 0.3s ease;
+    }
+    #sidebar-tab svg:hover {
+      stroke: #ddd;
+    }
+    #sidebar-tab.collapsed {
+      right: 0;
+    }
     
     /* ===== Legend Styles ===== */
     .legend {
@@ -280,101 +259,114 @@
       margin-right: 8px;
       opacity: 0.7;
     }
-	
-	.leaflet-popup.active-label {
-  background-color: #fff;
-  color: #333;
-  border-radius: 6px;
-  font-weight: 600;
-  padding: 4px 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  border: none;
-}
-.leaflet-popup-content-wrapper {
-  padding: 0;
-}
-.leaflet-popup-content {
-  margin: 6px;
-}
-
-#sidebar-tab svg:hover {
-  stroke: #ddd;
-}
-
-
+    
+    .leaflet-popup.active-label {
+      background-color: #fff;
+      color: #333;
+      border-radius: 6px;
+      font-weight: 600;
+      padding: 4px 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      border: none;
+    }
+    .leaflet-popup-content-wrapper {
+      padding: 0;
+    }
+    .leaflet-popup-content {
+      margin: 6px;
+    }
+    
+    /* ===== Media Queries for Mobile ===== */
+    @media (max-width: 600px) {
+      #sidebar {
+        width: 100vw;
+        padding: 12px;
+      }
+      .point-header h2 {
+        font-size: 1.1em;
+      }
+      .carousel-arrow {
+        padding: 4px 8px;
+        font-size: 14px;
+      }
+    }
+    
   </style>
 </head>
 <body>
   <div id="map"></div>
   
-<div id="sidebar">
-  <div class="scrollable-content">
-
-    <!-- ✨ New welcome content -->
-    <div id="sidebar-intro">
-      <h2 style="text-align:center; color:#4a148c;">Welcome to Grays Ferry</h2>
-      <p style="text-align:center; color:#444; margin: 10px 0 15px;">
-        Click a point on the map to explore stories, struggles, and strength from the neighborhood.
-      </p>
-<div style="height: 140px; background-color: #f5f5f5;
-            background-image: repeating-linear-gradient(
-              45deg,
-              #e0e0e0,
-              #e0e0e0 2px,
-              #f5f5f5 2px,
-              #f5f5f5 10px
-            );
-            border-radius: 6px;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: inset 0 0 4px rgba(0,0,0,0.1);">
-  <span style="color: #444; font-size: 1em; font-style: italic;">Explore Community Stories</span>
-</div>
-    </div>
-
-    <!-- 🔁 Your original sidebar content wrapped in a hidden container -->
-    <div id="sidebar-content" style="display: none;">
-      <div class="point-header">
-        <button class="nav-button" onclick="prevPoint()" title="Previous Location">&#10094;</button>
-        <h2 id="sidebar-title">Title</h2>
-        <button class="nav-button" onclick="nextPoint()" title="Next Location">&#10095;</button>
-      </div>
-      <div id="pointCounter" class="point-counter"></div>
-
-      <!-- Unified Carousel -->
-      <div class="carousel-main" id="carouselMainContainer">
-        <img id="mainImage" style="display: none;" alt="Main Media">
-        <iframe id="mainVideo" style="display: none;" width="100%" height="200" frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-        </iframe>
-        <div id="mediaCaption" style="margin-top:4px; font-size:0.9em; color:#555;"></div>
-        <div class="carousel-counter" id="carouselCounter">0 of 0</div>
-        <div class="carousel-arrows">
-          <button class="carousel-arrow" onclick="prevMedia()">&#10094;</button>
-          <button class="carousel-arrow" onclick="nextMedia()">&#10095;</button>
+  <div id="sidebar">
+    <div class="scrollable-content">
+  
+      <!-- ✨ New welcome content -->
+      <div id="sidebar-intro">
+        <h2 style="text-align:center; color:#4a148c;">Welcome to Grays Ferry</h2>
+        <p style="text-align:center; color:#444; margin: 10px 0 15px;">
+          Click a point on the map to explore stories, struggles, and strength from the neighborhood.
+        </p>
+        <div style="height: 140px; background-color: #f5f5f5;
+                    background-image: repeating-linear-gradient(
+                      45deg,
+                      #e0e0e0,
+                      #e0e0e0 2px,
+                      #f5f5f5 2px,
+                      #f5f5f5 10px
+                    );
+                    border-radius: 6px;
+                    display: flex; align-items: center; justify-content: center;
+                    box-shadow: inset 0 0 4px rgba(0,0,0,0.1);
+                    margin-bottom: 10px;">
+          <span style="color: #444; font-size: 1em; font-style: italic;">
+            Bridge to Community Stories
+          </span>
         </div>
       </div>
-
-      <div class="carousel-thumbnails" id="carouselThumbnails"></div>
-      <p id="sidebar-address"></p>
-      <div id="sidebar-text" class="section"></div>
-
-      <audio controls id="sidebar-audio" style="display: none; width: 100%;">
-        <source id="audio-src" src="" type="audio/mpeg">
-        Your browser does not support the audio element.
-      </audio>
-
-      <div id="sidebar-contributor" class="section"></div>
-    </div> <!-- end #sidebar-content -->
-
-  </div> <!-- end .scrollable-content -->
-</div>
-
-<div id="sidebar-tab" onclick="toggleSidebar()" title="Toggle Sidebar">
-  <svg id="toggleIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
-    <path id="togglePath" d="M15 6l-6 6 6 6"/>
-  </svg>
-</div>
-
+  
+      <!-- 🔁 Original sidebar content (hidden initially) -->
+      <div id="sidebar-content" style="display: none;">
+        <div class="point-header">
+          <button class="nav-button" onclick="prevPoint()" title="Previous Location">&#10094;</button>
+          <h2 id="sidebar-title">Title</h2>
+          <button class="nav-button" onclick="nextPoint()" title="Next Location">&#10095;</button>
+        </div>
+        <div id="pointCounter" class="point-counter"></div>
+  
+        <!-- Unified Carousel -->
+        <div class="carousel-main" id="carouselMainContainer">
+          <img id="mainImage" style="display: none;" alt="Main Media">
+          <iframe id="mainVideo" style="display: none;" width="100%" height="200" frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+          </iframe>
+          <div id="mediaCaption" style="margin-top:4px; font-size:0.9em; color:#555;"></div>
+          <div class="carousel-counter" id="carouselCounter">0 of 0</div>
+          <div class="carousel-arrows">
+            <button class="carousel-arrow" onclick="prevMedia()">&#10094;</button>
+            <button class="carousel-arrow" onclick="nextMedia()">&#10095;</button>
+          </div>
+        </div>
+  
+        <div class="carousel-thumbnails" id="carouselThumbnails"></div>
+        <p id="sidebar-address"></p>
+        <div id="sidebar-text" class="section"></div>
+  
+        <audio controls id="sidebar-audio" style="display: none; width: 100%;">
+          <source id="audio-src" src="" type="audio/mpeg">
+          Your browser does not support the audio element.
+        </audio>
+  
+        <div id="sidebar-contributor" class="section"></div>
+      </div> <!-- end #sidebar-content -->
+  
+    </div> <!-- end .scrollable-content -->
+  </div>
+  
+  <div id="sidebar-tab" onclick="toggleSidebar()" title="Toggle Sidebar">
+    <svg id="toggleIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+      <path id="togglePath" d="M15 6l-6 6 6 6"/>
+    </svg>
+  </div>
+  
   <script>
     /******** Global Variables & Helper Functions ********/
     let allLocations = [];
@@ -382,8 +374,7 @@
     let markersArray = [];
     let carouselItems = []; // Unified array for images and videos
     let currentMediaIndex = 0;
-	let activePopup = null;
-
+    let activePopup = null;
     
     // Convert a Google Drive URL into a direct thumbnail link.
     function convertGoogleDriveImageLink(url) {
@@ -421,15 +412,15 @@
         pane: 'labelsPane'
       }
     );
-    var cartoVoyagerNoLabels = L.tileLayer(
+    const cartoVoyagerNoLabels = L.tileLayer(
       'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',
       { attribution: '&copy; CARTO', subdomains: 'abcd', maxZoom: 19 }
     );
-    var googleStreets = L.tileLayer(
+    const googleStreets = L.tileLayer(
       'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
       { attribution: '&copy; Google Maps' }
     );
-    var basemaps = {
+    const basemaps = {
       "Google Streets": googleStreets,
       "Esri World Imagery": L.tileLayer(
         'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
@@ -437,11 +428,11 @@
       ),
       "Carto Voyager (No Labels)": cartoVoyagerNoLabels
     };
-    var bounds = L.latLngBounds(
+    const bounds = L.latLngBounds(
       [39.88803551186901, -75.24100534247376],
       [39.96163027738092, -75.1591196365127]
     );
-    var map = L.map('map', {
+    const map = L.map('map', {
       layers: [cartoVoyagerNoLabels],
       maxBounds: bounds,
       minZoom: 12,
@@ -456,13 +447,13 @@
     cartoVoyagerLabels.addTo(map);
     
     // Optional: Add a historic image overlay.
-    var imageUrl = 'jbrew1934.png';
-    var imageBounds = [
+    const imageUrl = 'jbrew1934.png';
+    const imageBounds = [
       [39.903605, -75.235695],
       [39.965321, -75.121852]
     ];
-    var historicMap = L.imageOverlay(imageUrl, imageBounds, {});
-    var overlays = { 
+    const historicMap = L.imageOverlay(imageUrl, imageBounds, {});
+    const overlays = { 
       "1934 Historic Map": historicMap,
       "Street Labels": cartoVoyagerLabels
     };
@@ -489,9 +480,9 @@
       "Streets",
       "Uncategorized Site"
     ];
-    var legend = L.control({ position: "bottomleft" });
+    const legend = L.control({ position: "bottomleft" });
     legend.onAdd = function(map) {
-      var div = L.DomUtil.create("div", "legend");
+      const div = L.DomUtil.create("div", "legend");
       div.innerHTML += "<h4>Legend</h4>";
       categoryOrder.forEach(key => {
         if (categoryIcons[key]) {
@@ -505,7 +496,7 @@
     const categoryIcons = {};
     
     /******** Data Fetch & Marker Creation ********/
-    var apiUrl = "https://script.google.com/macros/s/AKfycbzyrIcLZaFyYhwUGviH9bYw5GOzKGooPomy2arJmi2D4V-G8-QF-yME-gqcnaSHUeDYVA/exec";
+    const apiUrl = "https://script.google.com/macros/s/AKfycbzyrIcLZaFyYhwUGviH9bYw5GOzKGooPomy2arJmi2D4V-G8-QF-yME-gqcnaSHUeDYVA/exec";
     fetch(apiUrl)
       .then(response => response.json())
       .then(data => {
@@ -514,13 +505,13 @@
           if (!location.X || !location.Y) return;
           
           // Determine category (or fallback).
-          let category = location["Category/Layer"] ? location["Category/Layer"].trim() : "Uncategorized Site";
+          const category = location["Category/Layer"] ? location["Category/Layer"].trim() : "Uncategorized Site";
           // Save marker icon for the legend if available.
           if (!categoryIcons[category] && location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")) {
             categoryIcons[category] = convertGoogleDriveImageLink(location["Marker Icon"]);
           }
           // Create marker using either the custom icon image or a colored circle.
-          let customIcon = location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")
+          const customIcon = location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")
             ? L.icon({
                 iconUrl: convertGoogleDriveImageLink(location["Marker Icon"]),
                 iconSize: [32, 32],
@@ -531,50 +522,47 @@
                 className: "default-circle",
                 html: `<div style="background:${categoryColors[category]}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #333;"></div>`
               });
-          let marker = L.marker([parseFloat(location.X), parseFloat(location.Y)], { icon: customIcon });
+          const marker = L.marker([parseFloat(location.X), parseFloat(location.Y)], { icon: customIcon });
           marker.on('click', () => {
             updateSidebar(location, allLocations.indexOf(location));
           });
           markersArray.push(marker);
         });
         L.layerGroup(markersArray).addTo(map);
-		// updateSidebar(allLocations[0], 0);
+        // Uncomment the line below to auto-load the first location in the sidebar:
+        // updateSidebar(allLocations[0], 0);
         legend.addTo(map);
       })
       .catch(error => console.error("Error fetching data:", error));
       
     /******** Sidebar & Carousel Functions ********/
-
-function updateSidebar(location, index) {
-  currentIndex = index;
-
-  // 👇 New toggle: hide intro, show content
-  document.getElementById("sidebar-intro").style.display = "none";
-  document.getElementById("sidebar-content").style.display = "block";
-
+    
+    function updateSidebar(location, index) {
+      currentIndex = index;
+  
+      // Hide intro, show content
+      document.getElementById("sidebar-intro").style.display = "none";
+      document.getElementById("sidebar-content").style.display = "block";
       document.getElementById("sidebar").classList.add("visible");
-	  const tab = document.getElementById("sidebar-tab");
+      const tab = document.getElementById("sidebar-tab");
       tab.innerHTML = '◀';
-	  document.getElementById("sidebar-title").textContent = location?.Name || "Untitled";
-	  document.getElementById("sidebar-address").innerHTML = location.Address
-      ? `<span style="font-weight:500; color:#555;">📍 Address:</span> ${location.Address}`
-      : "";
-const rawText = location.Document || location.Text || "";
-const formattedText = rawText
-  .split(/\n\s*\n+/)
-  .map(para => {
-    const trimmed = para.trim();
-    const withEmphasis = emphasizeKeywords(trimmed);
-
-    if (/^["“].+["”]$/.test(trimmed) || /et al\./i.test(trimmed) || /\(\s*.*\s*\)/.test(trimmed)) {
-      return `<blockquote>${withEmphasis}</blockquote>`;
-    }
-    return `<p>${withEmphasis}</p>`;
-  })
-  .join("");
-
-document.getElementById("sidebar-text").innerHTML = formattedText;
-
+      document.getElementById("sidebar-title").textContent = location?.Name || "Untitled";
+      document.getElementById("sidebar-address").innerHTML = location.Address
+          ? `<span style="font-weight:500; color:#555;">📍 Address:</span> ${location.Address}`
+          : "";
+      const rawText = location.Document || location.Text || "";
+      const formattedText = rawText
+          .split(/\n\s*\n+/)
+          .map(para => {
+            const trimmed = para.trim();
+            const withEmphasis = emphasizeKeywords(trimmed);
+            if (/^["“].+["”]$/.test(trimmed) || /et al\./i.test(trimmed) || /\(\s*.*\s*\)/.test(trimmed)) {
+              return `<blockquote>${withEmphasis}</blockquote>`;
+            }
+            return `<p>${withEmphasis}</p>`;
+          })
+          .join("");
+      document.getElementById("sidebar-text").innerHTML = formattedText;
       document.getElementById("sidebar-contributor").textContent = location["Contributed by"] ? "Contributed by: " + location["Contributed by"] : "";
       
       // Handle Audio (if available)
@@ -586,9 +574,8 @@ document.getElementById("sidebar-text").innerHTML = formattedText;
         document.getElementById("sidebar-audio").style.display = "none";
       }
       
-      // ===== Build Unified Carousel Items (Images & Videos) =====
+      // Build Unified Carousel Items (Images & Videos)
       carouselItems = [];
-      // Check for images (Image 1 to Image 14)
       for (let i = 1; i <= 14; i++) {
         const imageKey = "Image " + i;
         if (location[imageKey]) {
@@ -599,7 +586,6 @@ document.getElementById("sidebar-text").innerHTML = formattedText;
           });
         }
       }
-      // Check for a video and add to the array
       if (location.Video) {
         let videoId = extractYouTubeID(location.Video);
         if (videoId) {
@@ -611,74 +597,48 @@ document.getElementById("sidebar-text").innerHTML = formattedText;
         }
       }
       
-      // Build the carousel with our unified media items.
       buildCarousel(carouselItems);
       updatePointCounter();
-	  // Build the carousel with our unified media items.
-buildCarousel(carouselItems);
-updatePointCounter();
-
-// ⬇️ Add this here
-map.panTo([parseFloat(location.X), parseFloat(location.Y)]);
-if (activePopup) {
-  map.removeLayer(activePopup);
-}
-activePopup = L.popup({
-  closeButton: false,
-  offset: L.point(0, -30),
-  autoPan: false,
-  className: 'active-label'
-})
-  .setLatLng([parseFloat(location.X), parseFloat(location.Y)])
-  .setContent(`<strong>${location.Name}</strong>`)
-  .openOn(map);
-
-console.log("Sidebar updated for:", location);
-
+      map.panTo([parseFloat(location.X), parseFloat(location.Y)]);
+      if (activePopup) {
+        map.removeLayer(activePopup);
+      }
+      activePopup = L.popup({
+        closeButton: false,
+        offset: L.point(0, -30),
+        autoPan: false,
+        className: 'active-label'
+      })
+        .setLatLng([parseFloat(location.X), parseFloat(location.Y)])
+        .setContent(`<strong>${location.Name}</strong>`)
+        .openOn(map);
+  
       console.log("Sidebar updated for:", location);
     }
     
     function buildCarousel(items) {
       const thumbnailsContainer = document.getElementById("carouselThumbnails");
       thumbnailsContainer.innerHTML = "";
-      
-if (items.length === 0) {
-  document.getElementById("mainImage").src = "";
-  document.getElementById("mainImage").style.display = "none";
-  document.getElementById("mainVideo").src = "";
-  document.getElementById("mainVideo").style.display = "none";
-  
-  // Clear the old caption:
-  document.getElementById("mediaCaption").textContent = "";
-  
-  document.getElementById("carouselCounter").textContent = "No media available";
-  return;
-}
-
+      if (items.length === 0) {
+        document.getElementById("mainImage").src = "";
+        document.getElementById("mainImage").style.display = "none";
+        document.getElementById("mainVideo").src = "";
+        document.getElementById("mainVideo").style.display = "none";
+        document.getElementById("mediaCaption").textContent = "";
+        document.getElementById("carouselCounter").textContent = "No media available";
+        return;
+      }
       currentMediaIndex = 0;
       showMedia(currentMediaIndex);
-      
+  
       // Build thumbnails for each item.
       items.forEach((item, idx) => {
-        let thumb = document.createElement("img");
-        if (item.type === "image") {
-          thumb.src = item.url;
-        } else if (item.type === "video") {
-          thumb.src = `https://img.youtube.com/vi/${item.youtubeId}/0.jpg`;
-        }
+        const thumb = document.createElement("img");
+        thumb.src = item.type === "image" ? item.url : `https://img.youtube.com/vi/${item.youtubeId}/0.jpg`;
         thumb.onclick = () => showMedia(idx);
         thumbnailsContainer.appendChild(thumb);
       });
     }
-	
-	document.addEventListener('keydown', function(e) {
-  if (document.getElementById("sidebar").classList.contains("visible")) {
-    if (e.key === "ArrowRight") nextMedia();
-    else if (e.key === "ArrowLeft") prevMedia();
-    else if (e.key === "Escape") toggleSidebar();
-  }
-});
-
     
     function showMedia(index) {
       if (carouselItems.length === 0) return;
@@ -700,11 +660,9 @@ if (items.length === 0) {
         mainVideo.src = "https://www.youtube-nocookie.com/embed/" + item.youtubeId;
         mainVideo.style.display = "block";
       }
-      
       captionEl.textContent = item.desc || "";
-      document.getElementById("carouselCounter").textContent =
-        (currentMediaIndex + 1) + " of " + carouselItems.length;
-      
+      document.getElementById("carouselCounter").textContent = (currentMediaIndex + 1) + " of " + carouselItems.length;
+  
       // Update thumbnail highlighting.
       const thumbs = document.getElementById("carouselThumbnails").querySelectorAll("img");
       thumbs.forEach((thumb, idx) => {
@@ -720,11 +678,11 @@ if (items.length === 0) {
     }
     
     function nextPoint() {
-      let nextIndex = (currentIndex + 1) % allLocations.length;
+      const nextIndex = (currentIndex + 1) % allLocations.length;
       updateSidebar(allLocations[nextIndex], nextIndex);
     }
     function prevPoint() {
-      let prevIndex = (currentIndex - 1 + allLocations.length) % allLocations.length;
+      const prevIndex = (currentIndex - 1 + allLocations.length) % allLocations.length;
       updateSidebar(allLocations[prevIndex], prevIndex);
     }
     function updatePointCounter() {
@@ -734,29 +692,34 @@ if (items.length === 0) {
     function closeSidebar() {
       document.getElementById("sidebar").classList.remove("visible");
     }
-	
-function toggleSidebar() {
-  const sidebar = document.getElementById("sidebar");
-  const toggleIcon = document.getElementById("toggleIcon");
-  const isOpen = sidebar.classList.contains("visible");
-
-  if (isOpen) {
-    sidebar.classList.remove("visible");
-    // Rotate to 0 degrees (arrow will point right indicating "open sidebar")
-    toggleIcon.style.transform = "rotate(0deg)";
-  } else {
-    sidebar.classList.add("visible");
-    // Rotate to 180 degrees (arrow will point left indicating "close sidebar")
-    toggleIcon.style.transform = "rotate(180deg)";
-  }
-}
-
-	
-	function emphasizeKeywords(text) {
-  return text
-    .replace(/\b(PHA|HAC|EPA|Jane Golden|Mural Arts)\b/g, '<strong>$1</strong>');
-}
-
+    
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      const toggleIcon = document.getElementById("toggleIcon");
+      const isOpen = sidebar.classList.contains("visible");
+  
+      if (isOpen) {
+        sidebar.classList.remove("visible");
+        toggleIcon.style.transform = "rotate(0deg)";
+      } else {
+        sidebar.classList.add("visible");
+        toggleIcon.style.transform = "rotate(180deg)";
+      }
+    }
+    
+    function emphasizeKeywords(text) {
+      return text.replace(/\b(PHA|HAC|EPA|Jane Golden|Mural Arts)\b/g, '<strong>$1</strong>');
+    }
+    
+    // Keyboard navigation for carousel and sidebar toggle
+    document.addEventListener('keydown', function(e) {
+      if (document.getElementById("sidebar").classList.contains("visible")) {
+        if (e.key === "ArrowRight") nextMedia();
+        else if (e.key === "ArrowLeft") prevMedia();
+        else if (e.key === "Escape") toggleSidebar();
+      }
+    });
+  
   </script>
 </body>
 </html>
