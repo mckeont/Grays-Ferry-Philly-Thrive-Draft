@@ -420,73 +420,88 @@ map.getPane('markerPane').style.zIndex = 700;
     };
     L.control.layers(basemaps, overlays, { position: "topleft" }).addTo(map);
 
-    const categoryColors = {
-      "Parks and Green Spaces": "limegreen",
-      "Housing": "orange",
-      "Businesses": "sienna",
-      "Schools": "gold",
-      "Community Buildings": "lightblue",
-      "Environmental Impacts": "crimson",
-      "Streets": "gray",
-      "Uncategorized Site": "#d3dce6"
-    };
-    const categoryOrder = [
-      "Parks and Green Spaces",
-      "Housing",
-      "Businesses",
-      "Schools",
-      "Community Buildings",
-      "Environmental Impacts",
-      "Streets",
-      "Uncategorized Site"
-    ];
-    const legend = L.control({ position: "bottomleft" });
-    legend.onAdd = function(map) {
-      const div = L.DomUtil.create("div", "legend");
-      div.innerHTML += "<h4>Legend</h4>";
-      categoryOrder.forEach(key => {
-        if (categoryIcons[key]) {
-          div.innerHTML += `<div><img src="${categoryIcons[key]}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 6px;"> ${key}</div>`;
-        } else {
-          div.innerHTML += `<div><i style="background:${categoryColors[key]}; width: 12px; height: 12px; display: inline-block; margin-right: 5px;"></i> ${key}</div>`;
-        }
-      });
-      return div;
-    };
+const categoryColors = {
+  "Parks and Green Spaces": "limegreen",
+  "Housing": "orange",
+  "Businesses": "sienna",
+  "Schools": "gold",
+  "Community Buildings": "lightblue",
+  "Environmental Impacts": "crimson",
+  "Streets": "gray",
+  "Miscellaneous": "#d3dce6"  // changed here
+};
+
+const categoryOrder = [
+  "Parks and Green Spaces",
+  "Housing",
+  "Businesses",
+  "Schools",
+  "Community Buildings",
+  "Environmental Impacts",
+  "Streets",
+  "Miscellaneous"  // changed here
+];
+
+const legend = L.control({ position: "bottomleft" });
+legend.onAdd = function(map) {
+  const div = L.DomUtil.create("div", "legend");
+  div.innerHTML += "<h4>Legend</h4>";
+  categoryOrder.forEach(key => {
+    // Only show the category if it was used in at least one marker
+    if (!usedCategories.has(key)) return;
+    
+    if (categoryIcons[key]) {
+      div.innerHTML += `<div><img src="${categoryIcons[key]}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 6px;"> ${key}</div>`;
+    } else {
+      div.innerHTML += `<div><i style="background:${categoryColors[key]}; width: 12px; height: 12px; display: inline-block; margin-right: 5px;"></i> ${key}</div>`;
+    }
+  });
+  return div;
+};
+
     const categoryIcons = {};
 
     const apiUrl = "https://script.google.com/macros/s/AKfycbzyrIcLZaFyYhwUGviH9bYw5GOzKGooPomy2arJmi2D4V-G8-QF-yME-gqcnaSHUeDYVA/exec";
-    fetch(apiUrl)
-      .then(response => response.json())
-      .then(data => {
-        allLocations = data;
-        data.forEach((location, index) => {
-          if (!location.X || !location.Y) return;
-          const category = location["Category/Layer"] ? location["Category/Layer"].trim() : "Uncategorized Site";
-          if (!categoryIcons[category] && location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")) {
-            categoryIcons[category] = convertGoogleDriveImageLink(location["Marker Icon"]);
-          }
-          const customIcon = location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")
-            ? L.icon({
-                iconUrl: convertGoogleDriveImageLink(location["Marker Icon"]),
-                iconSize: [32, 32],
-                iconAnchor: [16, 32],
-                popupAnchor: [0, -32]
-              })
-            : L.divIcon({
-                className: "default-circle",
-                html: `<div style="background:${categoryColors[category]}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #333;"></div>`
-              });
-          const marker = L.marker([parseFloat(location.X), parseFloat(location.Y)], { icon: customIcon });
-          marker.on('click', () => {
-            updateSidebar(location, allLocations.indexOf(location));
+let usedCategories = new Set();
+
+fetch(apiUrl)
+  .then(response => response.json())
+  .then(data => {
+    allLocations = data;
+    data.forEach((location, index) => {
+      if (!location.X || !location.Y) return;
+      // Use "Miscellaneous" as the fallback:
+      const category = (location["Category/Layer"] && location["Category/Layer"].trim() !== "")
+                         ? location["Category/Layer"].trim()
+                         : "Miscellaneous";
+      // Record that this category is in use:
+      usedCategories.add(category);
+      
+      if (!categoryIcons[category] && location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")) {
+        categoryIcons[category] = convertGoogleDriveImageLink(location["Marker Icon"]);
+      }
+      const customIcon = (location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com"))
+        ? L.icon({
+            iconUrl: convertGoogleDriveImageLink(location["Marker Icon"]),
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            popupAnchor: [0, -32]
+          })
+        : L.divIcon({
+            className: "default-circle",
+            html: `<div style="background:${categoryColors[category]}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #333;"></div>`
           });
-          markersArray.push(marker);
-        });
-        L.layerGroup(markersArray).addTo(map);
-        legend.addTo(map);
-      })
-      .catch(error => console.error("Error fetching data:", error));
+      const marker = L.marker([parseFloat(location.X), parseFloat(location.Y)], { icon: customIcon });
+      marker.on('click', () => {
+        updateSidebar(location, allLocations.indexOf(location));
+      });
+      markersArray.push(marker);
+    });
+    L.layerGroup(markersArray).addTo(map);
+    legend.addTo(map);
+  })
+  .catch(error => console.error("Error fetching data:", error));
+
     function updateSidebar(location, index) {
       currentIndex = index;
       document.getElementById("sidebar-intro").style.display = "none";
