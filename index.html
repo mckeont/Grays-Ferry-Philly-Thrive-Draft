@@ -392,16 +392,21 @@
       [39.88803551186901, -75.24100534247376],
       [39.96163027738092, -75.1591196365127]
     );
-    const map = L.map('map', {
-      layers: [cartoVoyagerNoLabels],
-      maxBounds: bounds,
-      minZoom: 12,
-      maxZoom: 20
-    });
-    map.setView([39.9362, -75.1956], 16);
-    map.createPane('labelsPane');
-    map.getPane('labelsPane').style.zIndex = 650;
-    map.getPane('labelsPane').style.pointerEvents = 'none';
+
+const map = L.map('map', {
+  layers: [cartoVoyagerNoLabels],
+  maxBounds: bounds,
+  minZoom: 12,
+  maxZoom: 20
+});
+map.setView([39.9362, -75.1956], 16);
+
+// Pane customization — must be AFTER map is created
+map.createPane('labelsPane');
+map.getPane('labelsPane').style.zIndex = 650;
+map.getPane('labelsPane').style.pointerEvents = 'none';
+map.getPane('markerPane').style.zIndex = 700;
+
     cartoVoyagerLabels.addTo(map);
     const imageUrl = 'jbrew1934.png';
     const imageBounds = [
@@ -558,29 +563,47 @@
       console.log("Sidebar updated for:", location);
     }
     
-    function buildCarousel(items) {
-      const thumbnailsContainer = document.getElementById("carouselThumbnails");
-      thumbnailsContainer.innerHTML = "";
-      if (items.length === 0) {
-        document.getElementById("mainImage").src = "";
-        document.getElementById("mainImage").style.display = "none";
-        document.getElementById("mainVideo").src = "";
-        document.getElementById("mainVideo").style.display = "none";
-        document.getElementById("mediaCaption").textContent = "";
-        document.getElementById("carouselCounter").textContent = "No media available";
-        return;
-      }
-      currentMediaIndex = 0;
-      showMedia(currentMediaIndex);
-	  
-      items.forEach((item, idx) => {
-        const thumb = document.createElement("img");
-        thumb.src = item.type === "image" ? item.url : `https://img.youtube.com/vi/${item.youtubeId}/0.jpg`;
-        thumb.onclick = () => showMedia(idx);
-        thumbnailsContainer.appendChild(thumb);
-      });
+function buildCarousel(items) {
+  const thumbnailsContainer = document.getElementById("carouselThumbnails");
+  const arrowContainer = document.querySelector(".carousel-arrows");
+  thumbnailsContainer.innerHTML = "";
+
+  // If there are no media items, hide the arrows (and any media elements)
+  if (items.length === 0) {
+    document.getElementById("mainImage").src = "";
+    document.getElementById("mainImage").style.display = "none";
+    document.getElementById("mainVideo").src = "";
+    document.getElementById("mainVideo").style.display = "none";
+    document.getElementById("mediaCaption").textContent = "";
+    document.getElementById("carouselCounter").textContent = "No media available";
+
+    // Hide the arrow controls
+    if (arrowContainer) {
+      arrowContainer.style.display = "none";
     }
-    
+    return;
+  } else {
+    // If we do have images/videos, show the arrow container
+    if (arrowContainer) {
+      arrowContainer.style.display = "flex";
+    }
+  }
+
+  // Initialize the carousel with the first media item
+  currentMediaIndex = 0;
+  showMedia(currentMediaIndex);
+
+  // Build thumbnails
+  items.forEach((item, idx) => {
+    const thumb = document.createElement("img");
+    thumb.src = item.type === "image"
+      ? item.url
+      : `https://img.youtube.com/vi/${item.youtubeId}/0.jpg`;
+    thumb.onclick = () => showMedia(idx);
+    thumbnailsContainer.appendChild(thumb);
+  });
+}
+
     function showMedia(index) {
       if (carouselItems.length === 0) return;
       currentMediaIndex = (index + carouselItems.length) % carouselItems.length;
