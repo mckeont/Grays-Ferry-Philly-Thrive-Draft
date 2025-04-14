@@ -306,7 +306,26 @@
           <button class="nav-button" onclick="nextPoint()" title="Next Location">&#10095;</button>
         </div>
         <div id="pointCounter" class="point-counter"></div>
-        <div class="carousel-main" id="carouselMainContainer">
+<div class="carousel-main" id="carouselMainContainer">
+  <!-- Fullscreen button, top-right corner -->
+  <button 
+    id="fullscreenBtn" 
+    style="
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 2;
+      background: rgba(0,0,0,0.4);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 6px;
+      cursor: pointer;
+    "
+    title="View Fullscreen">
+    ⛶
+  </button>
+  
           <img id="mainImage" style="display: none;" alt="Main Media">
           <iframe id="mainVideo" style="display: none;" width="100%" height="200" frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
@@ -514,17 +533,20 @@ fetch(apiUrl)
           ? `<span style="font-weight:500; color:#555;">📍 Address:</span> ${location.Address}`
           : "";
       const rawText = location.Document || location.Text || "";
-      const formattedText = rawText
-          .split(/\n\s*\n+/)
-          .map(para => {
-            const trimmed = para.trim();
-            const withEmphasis = emphasizeKeywords(trimmed);
-            if (/^["“].+["”]$/.test(trimmed) || /et al\./i.test(trimmed) || /\(\s*.*\s*\)/.test(trimmed)) {
-              return `<blockquote>${withEmphasis}</blockquote>`;
-            }
-            return `<p>${withEmphasis}</p>`;
-          })
-          .join("");
+const formattedText = rawText
+  .split(/\n\s*\n+/)
+  .map(para => {
+    const trimmed = para.trim();
+    const withEmphasis = emphasizeKeywords(trimmed);
+    // Only wrap as a blockquote if the entire paragraph is wrapped in quotes
+    // or if it contains "et al." (as you wish to emphasize those parts)
+    if (/^["“].+["”]$/.test(trimmed) || /et al\./i.test(trimmed)) {
+      return `<blockquote>${withEmphasis}</blockquote>`;
+    }
+    return `<p>${withEmphasis}</p>`;
+  })
+  .join("");
+
       document.getElementById("sidebar-text").innerHTML = formattedText;
       document.getElementById("sidebar-contributor").textContent = location["Contributed by"] ? "Contributed by: " + location["Contributed by"] : "";
       
@@ -618,6 +640,20 @@ function buildCarousel(items) {
     thumbnailsContainer.appendChild(thumb);
   });
 }
+
+document.getElementById("fullscreenBtn").addEventListener("click", () => {
+  const mainImage = document.getElementById("mainImage");
+  // or you could target the entire carouselMainContainer
+  // const carouselMain = document.getElementById("carouselMainContainer");
+  
+  if (mainImage.style.display === "block") {
+    // Only fullscreen the image if it's currently visible
+    if (mainImage.requestFullscreen) {
+      mainImage.requestFullscreen();
+    } 
+  }
+});
+
 
     function showMedia(index) {
       if (carouselItems.length === 0) return;
