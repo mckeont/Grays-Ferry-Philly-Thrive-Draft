@@ -8,6 +8,7 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css">
+  <script src="https://rawcdn.githack.com/makinacorpus/Leaflet.TextPath/master/leaflet.textpath.js"></script>
   <meta http-equiv="Content-Language" content="en">
   <meta name="google" content="notranslate">
   <style>
@@ -353,6 +354,9 @@
       <path id="togglePath" d="M15 6l-6 6 6 6"/>
     </svg>
   </div>
+  <!-- make sure this path is correct relative to your HTML file -->
+<script src="streets-data.js"></script>
+
   <script>
     let allLocations = [];
     let currentIndex = 0;
@@ -382,15 +386,7 @@
       }
       return null;
     }
-    const cartoVoyagerLabels = L.tileLayer(
-      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',
-      {
-        attribution: 'Street Labels © OpenStreetMap',
-        subdomains: 'abcd',
-        maxZoom: 19,
-        pane: 'labelsPane'
-      }
-    );
+
     const cartoVoyagerNoLabels = L.tileLayer(
       'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',
       { attribution: '&copy; CARTO, tpmckeon', subdomains: 'abcd', maxZoom: 19 }
@@ -425,20 +421,6 @@ map.createPane('labelsPane');
 map.getPane('labelsPane').style.zIndex = 650;
 map.getPane('labelsPane').style.pointerEvents = 'none';
 map.getPane('markerPane').style.zIndex = 700;
-
-    cartoVoyagerLabels.addTo(map);
-    const imageUrl = 'jbrew1934.png';
-    const imageBounds = [
-      [39.903605, -75.235695],
-      [39.965321, -75.121852]
-    ];
-    const historicMap = L.imageOverlay(imageUrl, imageBounds, {});
-    const overlays = { 
-      "1934 Historic Map": historicMap,
-      "Street Labels": cartoVoyagerLabels
-    };
-    L.control.layers(basemaps, overlays, { position: "topleft" }).addTo(map);
-
 const categoryColors = {
   "Parks and Green Spaces": "limegreen",
   "Housing": "orange",
@@ -461,6 +443,27 @@ const categoryOrder = [
   "Miscellaneous"  // changed here
 ];
 
+
+// use your existing categoryColors (you have "Streets": "gray")
+const streetsLayer = L.geoJSON(streetsData, {
+  style: () => ({
+    color: categoryColors['Streets'],
+    weight: 2
+  })
+});
+
+    const imageUrl = 'jbrew1934.png';
+    const imageBounds = [
+      [39.903605, -75.235695],
+      [39.965321, -75.121852]
+    ];
+    const historicMap = L.imageOverlay(imageUrl, imageBounds, {});
+    const overlays = { 
+      "1934 Historic Map": historicMap,
+	  "Streets": streetsLayer  
+    };
+    L.control.layers(basemaps, overlays, { position: "topleft" }).addTo(map);
+
 const legend = L.control({ position: "bottomleft" });
 legend.onAdd = function(map) {
   const div = L.DomUtil.create("div", "legend");
@@ -479,6 +482,36 @@ legend.onAdd = function(map) {
 };
 
     const categoryIcons = {};
+	
+	
+	const labeledSegments = new Set();
+
+const streetLabels = L.geoJSON(streetsData, {
+  style: {
+    color: '#ccc',
+    weight: 1
+  },
+  onEachFeature: function (feature, layer) {
+    const name = feature.properties?.STNAME;
+    if (!name || labeledSegments.has(name)) return;
+
+    labeledSegments.add(name);
+
+    layer.setText(name, {
+      repeat: false,             // Don’t repeat the label
+      center: true,             // Center the label
+      offset: -3,               // Slight vertical offset
+      attributes: {
+        fill: '#444',
+        'font-size': '10px',
+        'font-family': 'Roboto Condensed, sans-serif'
+      }
+    });
+  }
+});
+
+streetLabels.addTo(map);
+
 
     const apiUrl = "https://script.google.com/macros/s/AKfycbzyrIcLZaFyYhwUGviH9bYw5GOzKGooPomy2arJmi2D4V-G8-QF-yME-gqcnaSHUeDYVA/exec";
 let usedCategories = new Set();
