@@ -161,12 +161,15 @@
     #sidebar-address {
       font-size: 0.95em;
       margin-top: 8px;
+	  display: none;
     }
+	
     #sidebar-text p:first-of-type {
       font-weight: 500;
       color: #222;
     }
 	
+
 	h1, h2, h3, .point-header h2 {
   font-family: 'Shippori Mincho', serif;
 }
@@ -346,7 +349,18 @@ h1, h2, h3, .time-filter button, .point-header h2 {
   margin-right: 6px;
 }
 
-    
+.leaflet-tooltip.marker-tooltip {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  color: #333;
+  padding: 4px 8px;
+  font-size: 0.85em;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+  z-index: 10000 !important;  /* Force it above markers */
+}
+
   </style>
 </head>
 <body>
@@ -383,20 +397,21 @@ h1, h2, h3, .time-filter button, .point-header h2 {
         </div>
         <div id="pointCounter" class="point-counter"></div>
 		
-		<button onclick="showIntro()" style="
-  background: #ddd;
-  color: #333;
-  font-weight: bold;
-  border: none;
+<button onclick="showIntro()" style="
+  background: #fce4ec;
+  color: #6a1b9a;
+  font-weight: 500;
+  border: 1px solid #f8bbd0;
   border-radius: 6px;
-  padding: 8px 12px;
+  padding: 4px 6px;
   margin-bottom: 12px;
   cursor: pointer;
-  width: 100%;
+  width: auto;
+  font-size: 0.9em;
+  transition: background 0.3s ease, color 0.3s ease;
 ">
-  ⬅ About This Map
+  ⬅ About
 </button>
-
 
 	   <div class="carousel-main" id="carouselMainContainer">
   <button 
@@ -530,7 +545,7 @@ const categoryColors = {
   "Community Buildings": "lightblue",
   "Environmental Impacts": "crimson",
   "Streets": "gray",
-  "Miscellaneous": "#d3dce6"  // changed here
+  "Miscellaneous": "#d3dce6"  
 };
 
 const categoryOrder = [
@@ -541,14 +556,13 @@ const categoryOrder = [
   "Community Buildings",
   "Environmental Impacts",
   "Streets",
-  "Miscellaneous"  // changed here
+  "Miscellaneous"  
 ];
 
 	let currentPeriod     = 'all';
 	let visibleCategories = new Set(categoryOrder);
 
 
-// 1) Create your two GeoJSON layers—but don’t add either directly to the map
 const streetsLayer = L.geoJSON(streetsData, {
   style: () => ({ color: categoryColors['Streets'], weight: 2 })
 });
@@ -574,17 +588,10 @@ const streetLabels = L.geoJSON(streetsData, {
   }
 });
 
-// 2) Group them so they toggle together
 const streetsGroup = L.layerGroup([streetsLayer, streetLabels]);
-
 
 document.getElementById('carouselPrev').addEventListener('click', prevMedia);
 document.getElementById('carouselNext').addEventListener('click', nextMedia);
-document.querySelector('.point-header .nav-button:first-of-type')
-        .addEventListener('click', prevPoint);
-document.querySelector('.point-header .nav-button:last-of-type')
-        .addEventListener('click', nextPoint);
-
 
     const imageUrl = 'jbrew1934.png';
     const imageBounds = [
@@ -596,14 +603,12 @@ document.querySelector('.point-header .nav-button:last-of-type')
   "1934 Historic Map": historicMap,
   "Streets": streetsGroup
 };
-
     L.control.layers(basemaps, overlays, { position: "topleft" }).addTo(map);
 
 let usedCategories = new Set();
 const legend = L.control({ position: 'bottomleft' });
 
 legend.onAdd = function(map) {
-  // 1) build container + inject HTML
   const container = L.DomUtil.create('div', 'legend leaflet-bar');
   container.innerHTML = `
     <div class="time-filter">
@@ -615,7 +620,6 @@ legend.onAdd = function(map) {
     <div id="category-filter"></div>
   `;
 
-  // 2) wire up the time-filter buttons
   container.querySelectorAll('.time-filter button').forEach(btn => {
     btn.addEventListener('click', e => {
       container.querySelector('.time-filter .active').classList.remove('active');
@@ -625,7 +629,6 @@ legend.onAdd = function(map) {
     });
   });
 
-  // 3) populate the category checkboxes
   const catDiv = container.querySelector('#category-filter');
   categoryOrder.forEach(cat => {
     if (!usedCategories.has(cat)) return;
@@ -639,7 +642,6 @@ legend.onAdd = function(map) {
     `;
   });
 
-  // 4) then wire up the category-filter checkboxes
   container.querySelectorAll('#category-filter input').forEach(cb => {
     cb.addEventListener('change', () => {
       visibleCategories = new Set(
@@ -655,8 +657,6 @@ legend.onAdd = function(map) {
 
 legend.addTo(map);
 
-
-
 function refreshMarkers() {
   markersArray.forEach(marker => {
     const cat    = marker.options.category;
@@ -669,13 +669,8 @@ function refreshMarkers() {
   });
 }
 
-
-
     const categoryIcons = {};
-	
-
     const apiUrl = "https://script.google.com/macros/s/AKfycbzyrIcLZaFyYhwUGviH9bYw5GOzKGooPomy2arJmi2D4V-G8-QF-yME-gqcnaSHUeDYVA/exec";
-
 
 fetch(apiUrl)
   .then(response => response.json())
@@ -683,11 +678,9 @@ fetch(apiUrl)
     allLocations = data;
     data.forEach((location, index) => {
       if (!location.X || !location.Y) return;
-      // Use "Miscellaneous" as the fallback:
       const category = (location["Category/Layer"] && location["Category/Layer"].trim() !== "")
                          ? location["Category/Layer"].trim()
                          : "Miscellaneous";
-      // Record that this category is in use:
       usedCategories.add(category);
       
       if (!categoryIcons[category] && location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")) {
@@ -705,6 +698,16 @@ fetch(apiUrl)
             html: `<div style="background:${categoryColors[category]}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #333;"></div>`
           });
       const marker = L.marker([parseFloat(location.X), parseFloat(location.Y)], { icon: customIcon });
+marker.bindTooltip(location.Name || "Untitled", {
+  direction: 'top',
+  offset: [0, -10],
+  permanent: false,
+  className: 'marker-tooltip',
+  sticky: true,
+  pane: 'markerPane' 
+});
+
+
 	  marker.options.category = category;
 	  marker.options.status   = (location.Status || 'Present').toLowerCase();  // “past” or “present”
       marker.on('click', () => {
@@ -738,9 +741,10 @@ intro.style.visibility = "hidden";
 `;
 
       document.getElementById("sidebar-title").textContent = location?.Name || "Untitled";
-      document.getElementById("sidebar-address").innerHTML = location.Address
-          ? `<span style="font-weight:500; color:#555;">📍 Address:</span> ${location.Address}`
-          : "";
+document.getElementById("sidebar-address").innerHTML = location.Address
+  ? `<span style="font-weight:500; color:#555;">📍 Address:</span> ${location.Address}`
+  : "";
+
       const rawText = location.Document || location.Text || "";
 const formattedText = rawText
   .split(/\n\s*\n+/)
@@ -759,7 +763,6 @@ const formattedText = rawText
       document.getElementById("sidebar-text").innerHTML = formattedText;
       document.getElementById("sidebar-contributor").textContent = location["Contributed by"] ? "Contributed by: " + location["Contributed by"] : "";
       
-      // Handle Audio (if available)
       if (location.Audio && location.Audio.includes("github.com")) {
         document.getElementById("sidebar-audio").style.display = "block";
         document.getElementById("audio-src").src = location.Audio;
@@ -768,27 +771,30 @@ const formattedText = rawText
         document.getElementById("sidebar-audio").style.display = "none";
       }
       
-      carouselItems = [];
-      for (let i = 1; i <= 14; i++) {
-        const imageKey = "Image " + i;
-        if (location[imageKey]) {
-          carouselItems.push({
-            type: "image",
-            url: convertGoogleDriveImageLink(location[imageKey]),
-            desc: location[imageKey + " Description"] || ""
-          });
-        }
-      }
-      if (location.Video) {
-        let videoId = extractYouTubeID(location.Video);
-        if (videoId) {
-          carouselItems.push({
-            type: "video",
-            youtubeId: videoId,
-            desc: location["Video Description"] || ""
-          });
-        }
-      }
+carouselItems = [];
+
+if (location.Video) {
+  let videoId = extractYouTubeID(location.Video);
+  if (videoId) {
+    carouselItems.push({
+      type: "video",
+      youtubeId: videoId,
+      desc: location["Video Description"] || ""
+    });
+  }
+}
+
+for (let i = 1; i <= 14; i++) {
+  const imageKey = "Image " + i;
+  if (location[imageKey]) {
+    carouselItems.push({
+      type: "image",
+      url: convertGoogleDriveImageLink(location[imageKey]),
+      desc: location[imageKey + " Description"] || ""
+    });
+  }
+}
+
       
       buildCarousel(carouselItems);
       updatePointCounter();
@@ -843,7 +849,6 @@ function buildCarousel(items) {
   const arrowContainer = document.querySelector(".carousel-arrows");
   thumbnailsContainer.innerHTML = "";
 
-  // If there are no media items, hide the arrows (and any media elements)
   if (items.length === 0) {
     document.getElementById("mainImage").src = "";
     document.getElementById("mainImage").style.display = "none";
@@ -852,7 +857,6 @@ function buildCarousel(items) {
     document.getElementById("mediaCaption").textContent = "";
     document.getElementById("carouselCounter").textContent = " ";
 
-    // Hide the arrow controls
     if (arrowContainer) {
       arrowContainer.style.display = "none";
     }
@@ -864,11 +868,9 @@ function buildCarousel(items) {
     }
   }
 
-  // Initialize the carousel with the first media item
   currentMediaIndex = 0;
   showMedia(currentMediaIndex);
-
-  // Build thumbnails
+	
   items.forEach((item, idx) => {
     const thumb = document.createElement("img");
     thumb.src = item.type === "image"
@@ -878,10 +880,6 @@ function buildCarousel(items) {
     thumbnailsContainer.appendChild(thumb);
   });
 }
-
-
-
-
     function showMedia(index) {
       if (carouselItems.length === 0) return;
       currentMediaIndex = (index + carouselItems.length) % carouselItems.length;
@@ -933,8 +931,6 @@ function buildCarousel(items) {
       document.getElementById("sidebar").classList.remove("visible");
     }
     
-
-    
     function emphasizeKeywords(text) {
       return text.replace(/\b(PHA|HAC|EPA|Jane Golden|Mural Arts)\b/g, '<strong>$1</strong>');
     }
@@ -951,13 +947,9 @@ window.nextMedia  = nextMedia;
 window.prevMedia  = prevMedia;
 window.nextPoint  = nextPoint;
 window.prevPoint  = prevPoint;
-
-// Show the intro slide and open the sidebar by default
+window.showIntro  = showIntro; 
 document.getElementById("sidebar").classList.add("visible");
 document.getElementById("togglePath").setAttribute("d", "M9 6l6 6-6 6");  // ◀
-
-
-
   });
   </script>
 </body>
