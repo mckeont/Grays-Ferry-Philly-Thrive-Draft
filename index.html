@@ -8,11 +8,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css">
   <meta http-equiv="Content-Language" content="en">
   <meta name="google" content="notranslate">
-  <link href="https://fonts.googleapis.com/css2?
-  family=Inter:wght@400;500;700&
-  family=Shippori+Mincho:wght@400;700&
-  display=swap"
-  rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
     html, body {
@@ -316,7 +312,7 @@
 #sidebar-content > *:first-child {
   margin-top: 0 !important;
 }
-body, #sidebar, .leaflet-control .legend {
+body, p, #sidebar, .leaflet-control .legend {
   font-family: 'Inter', sans-serif;
 }
 h1, h2, h3, .time-filter button, .point-header h2 {
@@ -386,6 +382,21 @@ h1, h2, h3, .time-filter button, .point-header h2 {
           <button class="nav-button" onclick="nextPoint()">›</button>
         </div>
         <div id="pointCounter" class="point-counter"></div>
+		
+		<button onclick="showIntro()" style="
+  background: #ddd;
+  color: #333;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  width: 100%;
+">
+  ⬅ About This Map
+</button>
+
 
 	   <div class="carousel-main" id="carouselMainContainer">
   <button 
@@ -535,13 +546,36 @@ const categoryOrder = [
 
 	let currentPeriod     = 'all';
 	let visibleCategories = new Set(categoryOrder);
-// use your existing categoryColors (you have "Streets": "gray")
+
+
+// 1) Create your two GeoJSON layers—but don’t add either directly to the map
 const streetsLayer = L.geoJSON(streetsData, {
-  style: () => ({
-    color: categoryColors['Streets'],
-    weight: 2
-  })
+  style: () => ({ color: categoryColors['Streets'], weight: 2 })
 });
+
+const labeledSegments = new Set();
+
+const streetLabels = L.geoJSON(streetsData, {
+  style: { color: '#ccc', weight: 1 },
+  onEachFeature: (feature, layer) => {
+    const name = feature.properties?.STNAME;
+    if (!name || labeledSegments.has(name)) return;
+    labeledSegments.add(name);
+    layer.setText(name, {
+      repeat: false,
+      center: true,
+      offset: -3,
+      attributes: {
+        fill: '#444',
+        'font-size': '10px',
+        'font-family': 'Roboto Condensed, sans-serif'
+      }
+    });
+  }
+});
+
+// 2) Group them so they toggle together
+const streetsGroup = L.layerGroup([streetsLayer, streetLabels]);
 
 
 document.getElementById('carouselPrev').addEventListener('click', prevMedia);
@@ -559,9 +593,10 @@ document.querySelector('.point-header .nav-button:last-of-type')
     ];
     const historicMap = L.imageOverlay(imageUrl, imageBounds, {});
     const overlays = { 
-      "1934 Historic Map": historicMap,
-	  "Streets": streetsLayer  
-    };
+  "1934 Historic Map": historicMap,
+  "Streets": streetsGroup
+};
+
     L.control.layers(basemaps, overlays, { position: "topleft" }).addTo(map);
 
 let usedCategories = new Set();
@@ -622,12 +657,6 @@ legend.addTo(map);
 
 
 
-
-map.removeControl(legend);
-legend.addTo(map);
-
-
-
 function refreshMarkers() {
   markersArray.forEach(marker => {
     const cat    = marker.options.category;
@@ -644,35 +673,6 @@ function refreshMarkers() {
 
     const categoryIcons = {};
 	
-	
-	const labeledSegments = new Set();
-
-const streetLabels = L.geoJSON(streetsData, {
-  style: {
-    color: '#ccc',
-    weight: 1
-  },
-  onEachFeature: function (feature, layer) {
-    const name = feature.properties?.STNAME;
-    if (!name || labeledSegments.has(name)) return;
-
-    labeledSegments.add(name);
-
-    layer.setText(name, {
-      repeat: false,             // Don’t repeat the label
-      center: true,             // Center the label
-      offset: -3,               // Slight vertical offset
-      attributes: {
-        fill: '#444',
-        'font-size': '10px',
-        'font-family': 'Roboto Condensed, sans-serif'
-      }
-    });
-  }
-});
-
-streetLabels.addTo(map);
-
 
     const apiUrl = "https://script.google.com/macros/s/AKfycbzyrIcLZaFyYhwUGviH9bYw5GOzKGooPomy2arJmi2D4V-G8-QF-yME-gqcnaSHUeDYVA/exec";
 
@@ -729,7 +729,14 @@ intro.style.visibility = "hidden";
       document.getElementById("sidebar-content").style.display = "block";
       document.getElementById("sidebar").classList.add("visible");
       const tab = document.getElementById("sidebar-tab");
-      tab.innerHTML = '◀';
+      tab.innerHTML = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+       fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"
+       onclick="toggleSidebar()">
+    <path id="togglePath" d="M9 6l6 6-6 6"/>
+  </svg>
+`;
+
       document.getElementById("sidebar-title").textContent = location?.Name || "Untitled";
       document.getElementById("sidebar-address").innerHTML = location.Address
           ? `<span style="font-weight:500; color:#555;">📍 Address:</span> ${location.Address}`
@@ -926,19 +933,6 @@ function buildCarousel(items) {
       document.getElementById("sidebar").classList.remove("visible");
     }
     
-function toggleSidebar() {
-  const sidebar = document.getElementById("sidebar");
-  const togglePath = document.getElementById("togglePath");
-  const isOpen = sidebar.classList.contains("visible");
-
-  if (isOpen) {
-    sidebar.classList.remove("visible");
-    togglePath.setAttribute("d", "M15 6l-6 6 6 6"); // ▶
-  } else {
-    sidebar.classList.add("visible");
-    togglePath.setAttribute("d", "M9 6l6 6-6 6"); // ◀
-  }
-}
 
     
     function emphasizeKeywords(text) {
@@ -957,6 +951,12 @@ window.nextMedia  = nextMedia;
 window.prevMedia  = prevMedia;
 window.nextPoint  = nextPoint;
 window.prevPoint  = prevPoint;
+
+// Show the intro slide and open the sidebar by default
+document.getElementById("sidebar").classList.add("visible");
+document.getElementById("togglePath").setAttribute("d", "M9 6l6 6-6 6");  // ◀
+
+
 
   });
   </script>
