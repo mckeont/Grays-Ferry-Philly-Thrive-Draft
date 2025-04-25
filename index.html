@@ -5,16 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Philly Thrive Map with Unified Carousel</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css">
-  <script src="https://rawcdn.githack.com/makinacorpus/Leaflet.TextPath/master/leaflet.textpath.js"></script>
   <meta http-equiv="Content-Language" content="en">
   <meta name="google" content="notranslate">
+  <link href="https://fonts.googleapis.com/css2?
+  family=Inter:wght@400;500;700&
+  family=Shippori+Mincho:wght@400;700&
+  display=swap"
+  rel="stylesheet">
+
   <style>
     html, body {
       margin: 0; padding: 0;
       height: 100vh; overflow: hidden;
+	  font-family: 'Inter', sans-serif;
     }
     #map {
       width: 100%; height: 100vh;
@@ -65,6 +69,7 @@
       font-size: 1.3em;
       margin: 0;
       font-weight: bold;
+	    font-family: 'Shippori Mincho', serif;
     }
     .nav-button {
       background: #6a1b9a;
@@ -165,6 +170,10 @@
       font-weight: 500;
       color: #222;
     }
+	
+	h1, h2, h3, .point-header h2 {
+  font-family: 'Shippori Mincho', serif;
+}
     
     #sidebar-text {
       font-size: 0.95em;
@@ -265,50 +274,120 @@
       }
       .point-header h2 {
         font-size: 1.1em;
+		font-family: 'Shippori Mincho', serif;
       }
       .carousel-arrow {
         padding: 4px 8px;
         font-size: 14px;
       }
     }
+	
+	#sidebar-intro {
+  text-align: center;
+  padding: 0;
+}
+
+#sidebar-intro { display: block; }
+#sidebar-content { display: none; }
+#sidebar.is-point-view #sidebar-intro { display: none; }
+#sidebar.is-point-view #sidebar-content { display: block; }
+#sidebar.intro-view .scrollable-content { padding-top:0; }
+
+
+#sidebar-intro > div:first-child {
+  position: relative;
+}
+#sidebar-intro img {
+  width: 100%;
+  height: auto;
+  max-height: 280px;
+  object-fit: cover;
+  border-radius: 8px 8px 0 0;
+}
+#sidebar-content {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.scrollable-content {
+  padding-top: 0;
+}
+
+#sidebar-content > *:first-child {
+  margin-top: 0 !important;
+}
+body, #sidebar, .leaflet-control .legend {
+  font-family: 'Inter', sans-serif;
+}
+h1, h2, h3, .time-filter button, .point-header h2 {
+  font-family: 'Shippori Mincho', serif;
+}
+.time-filter {
+  display: flex;
+  background: #ddd;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.time-filter button {
+  flex: 1;
+  border: none;
+  padding: 6px 12px;
+  background: none;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+.time-filter button.active {
+  background: #f9c66c;
+}
+.legend label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  cursor: pointer;
+}
+.legend label input {
+  margin-right: 6px;
+}
+
     
   </style>
 </head>
 <body>
   <div id="map"></div>
+
   <div id="sidebar">
     <div class="scrollable-content">
+
       <div id="sidebar-intro">
-        <h2 style="text-align:center; color:#4a148c;">Welcome to Grays Ferry</h2>
-        <p style="text-align:center; color:#444; margin: 10px 0 15px;">
-          Click a point on the map to explore stories, struggles, and strength from the neighborhood.
-        </p>
-        <div style="height: 140px; background-color: #f5f5f5;
-                    background-image: repeating-linear-gradient(
-                      45deg,
-                      #e0e0e0,
-                      #e0e0e0 2px,
-                      #f5f5f5 2px,
-                      #f5f5f5 10px
-                    );
-                    border-radius: 6px;
-                    display: flex; align-items: center; justify-content: center;
-                    box-shadow: inset 0 0 4px rgba(0,0,0,0.1);
-                    margin-bottom: 10px;">
-          <span style="color: #444; font-size: 1em; font-style: italic;">
-            Bridge to Community Stories
-          </span>
+        <div style="position: relative;">
+          <img src="sidebar.png" alt="Grays Ferry Playground" style="width:100%;max-height:280px;object-fit:cover;border-radius:8px 8px 0 0">
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-size:1.8em;font-weight:bold;text-shadow:1px 1px 6px rgba(0,0,0,0.6);font-family:Georgia,serif;line-height:1.3">
+            <!-- optional headline -->
+          </div>
+        </div>
+        <div style="padding:18px 0;color:#333;font-size:0.95em;">
+          <p>Click on any point on the map to explore the neighborhood past and present.</p>
+          <p>In the Legend in the bottom left corner, click the button to see all points, old points, or current points. </p>
+          <p>You can contribute to this map! Click the button below to have a point added to the map, or a story you have about a current point. </p>
+          <button onclick="window.open('https://graysferryarchive.com/addyourstory/','_blank')" style="display:block;width:100%;margin:14px 0;padding:12px;background:#97E0FF;color:#003c8f;font-weight:bold;border:none;border-radius:8px;cursor:pointer">
+            Know more about a point? Click here to add your story
+          </button>
+          <hr style="margin:24px 0;border:none;border-top:1px solid #ddd">
+          <p>Did you know that Grays Ferry was named after George Gray? His ferry company operated the Lower Ferry, or Gray’s Ferry, in the mid-18th century. The family owned land on either side of the Schuylkill River and maintained a floating bridge across the river. Prior to the arrival of Europeans, the land was stewarded by the Lenape people for thousands of years. </p>
+          <p>This map contains points from the past 110 years of Grays Ferry history. These points have been contributed by residents and former residents. Some points contain photos from historical archive sources, like libraries and government records. </p>
         </div>
       </div>
-      <div id="sidebar-content" style="display: none;">
+
+      <div id="sidebar-content" style="display:none">
         <div class="point-header">
-          <button class="nav-button" onclick="prevPoint()" title="Previous Location">&#10094;</button>
+          <button class="nav-button" onclick="prevPoint()">‹</button>
           <h2 id="sidebar-title">Title</h2>
-          <button class="nav-button" onclick="nextPoint()" title="Next Location">&#10095;</button>
+          <button class="nav-button" onclick="nextPoint()">›</button>
         </div>
         <div id="pointCounter" class="point-counter"></div>
-<div class="carousel-main" id="carouselMainContainer">
-  <!-- Fullscreen button, top-right corner -->
+
+	   <div class="carousel-main" id="carouselMainContainer">
   <button 
     id="fullscreenBtn" 
     style="
@@ -334,8 +413,9 @@
           <div id="mediaCaption" style="margin-top:4px; font-size:0.9em; color:#555;"></div>
           <div class="carousel-counter" id="carouselCounter">0 of 0</div>
           <div class="carousel-arrows">
-            <button class="carousel-arrow" onclick="prevMedia()">&#10094;</button>
-            <button class="carousel-arrow" onclick="nextMedia()">&#10095;</button>
+            <button id="carouselPrev" class="carousel-arrow">‹</button>
+			<button id="carouselNext" class="carousel-arrow">›</button>
+
           </div>
         </div>
         <div class="carousel-thumbnails" id="carouselThumbnails"></div>
@@ -345,22 +425,32 @@
           <source id="audio-src" src="" type="audio/mpeg">
           Your browser does not support the audio element.
         </audio>
-        <div id="sidebar-contributor" class="section"></div>
+        <div id="sidebar-contributor"></div>
       </div>
-    </div>
-  </div>
-  <div id="sidebar-tab" onclick="toggleSidebar()" title="Toggle Sidebar">
-    <svg id="toggleIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+
+    </div><!-- /.scrollable-content -->
+  </div><!-- /#sidebar -->
+
+  <div id="sidebar-tab">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+         fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"
+         onclick="toggleSidebar()">
       <path id="togglePath" d="M15 6l-6 6 6 6"/>
     </svg>
   </div>
-  <!-- make sure this path is correct relative to your HTML file -->
+  
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <script src="https://rawcdn.githack.com/makinacorpus/Leaflet.TextPath/master/leaflet.textpath.js"></script>
 <script src="streets-data.js"></script>
 
   <script>
+  document.addEventListener('DOMContentLoaded', () => {
+  
     let allLocations = [];
     let currentIndex = 0;
     let markersArray = [];
+
     let carouselItems = [];
     let currentMediaIndex = 0;
     let activePopup = null;
@@ -443,7 +533,8 @@ const categoryOrder = [
   "Miscellaneous"  // changed here
 ];
 
-
+	let currentPeriod     = 'all';
+	let visibleCategories = new Set(categoryOrder);
 // use your existing categoryColors (you have "Streets": "gray")
 const streetsLayer = L.geoJSON(streetsData, {
   style: () => ({
@@ -451,6 +542,15 @@ const streetsLayer = L.geoJSON(streetsData, {
     weight: 2
   })
 });
+
+
+document.getElementById('carouselPrev').addEventListener('click', prevMedia);
+document.getElementById('carouselNext').addEventListener('click', nextMedia);
+document.querySelector('.point-header .nav-button:first-of-type')
+        .addEventListener('click', prevPoint);
+document.querySelector('.point-header .nav-button:last-of-type')
+        .addEventListener('click', nextPoint);
+
 
     const imageUrl = 'jbrew1934.png';
     const imageBounds = [
@@ -464,22 +564,83 @@ const streetsLayer = L.geoJSON(streetsData, {
     };
     L.control.layers(basemaps, overlays, { position: "topleft" }).addTo(map);
 
-const legend = L.control({ position: "bottomleft" });
+let usedCategories = new Set();
+const legend = L.control({ position: 'bottomleft' });
+
 legend.onAdd = function(map) {
-  const div = L.DomUtil.create("div", "legend");
-  div.innerHTML += "<h4>Legend</h4>";
-  categoryOrder.forEach(key => {
-    // Only show the category if it was used in at least one marker
-    if (!usedCategories.has(key)) return;
-    
-    if (categoryIcons[key]) {
-      div.innerHTML += `<div><img src="${categoryIcons[key]}" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 6px;"> ${key}</div>`;
-    } else {
-      div.innerHTML += `<div><i style="background:${categoryColors[key]}; width: 12px; height: 12px; display: inline-block; margin-right: 5px;"></i> ${key}</div>`;
-    }
+  // 1) build container + inject HTML
+  const container = L.DomUtil.create('div', 'legend leaflet-bar');
+  container.innerHTML = `
+    <div class="time-filter">
+      <button data-period="all" class="active">All</button>
+      <button data-period="past">Past</button>
+      <button data-period="present">Present</button>
+    </div>
+    <h4>Categories</h4>
+    <div id="category-filter"></div>
+  `;
+
+  // 2) wire up the time-filter buttons
+  container.querySelectorAll('.time-filter button').forEach(btn => {
+    btn.addEventListener('click', e => {
+      container.querySelector('.time-filter .active').classList.remove('active');
+      e.target.classList.add('active');
+      currentPeriod = e.target.dataset.period;  // "all" | "past" | "present"
+      refreshMarkers();
+    });
   });
-  return div;
+
+  // 3) populate the category checkboxes
+  const catDiv = container.querySelector('#category-filter');
+  categoryOrder.forEach(cat => {
+    if (!usedCategories.has(cat)) return;
+    const icon = categoryIcons[cat]
+      ? `<img src="${categoryIcons[cat]}" style="width:18px;height:18px;margin-right:6px">`
+      : `<i style="background:${categoryColors[cat]};width:14px;height:14px;display:inline-block;margin-right:6px"></i>`;
+    const label = L.DomUtil.create('label', '', catDiv);
+    label.innerHTML = `
+      <input type="checkbox" value="${cat}" checked>
+      ${icon}${cat}
+    `;
+  });
+
+  // 4) then wire up the category-filter checkboxes
+  container.querySelectorAll('#category-filter input').forEach(cb => {
+    cb.addEventListener('change', () => {
+      visibleCategories = new Set(
+        [...container.querySelectorAll('#category-filter input:checked')]
+          .map(i => i.value)
+      );
+      refreshMarkers();
+    });
+  });
+
+  return container;
 };
+
+legend.addTo(map);
+
+
+
+
+map.removeControl(legend);
+legend.addTo(map);
+
+
+
+function refreshMarkers() {
+  markersArray.forEach(marker => {
+    const cat    = marker.options.category;
+    const stat  = marker.options.status;       // “past” or “present”
+    const show  = visibleCategories.has(cat) &&
+                  (currentPeriod === 'all' || stat === currentPeriod);
+
+    if (show) marker.addTo(map);
+    else      map.removeLayer(marker);
+  });
+}
+
+
 
     const categoryIcons = {};
 	
@@ -514,7 +675,7 @@ streetLabels.addTo(map);
 
 
     const apiUrl = "https://script.google.com/macros/s/AKfycbzyrIcLZaFyYhwUGviH9bYw5GOzKGooPomy2arJmi2D4V-G8-QF-yME-gqcnaSHUeDYVA/exec";
-let usedCategories = new Set();
+
 
 fetch(apiUrl)
   .then(response => response.json())
@@ -544,6 +705,8 @@ fetch(apiUrl)
             html: `<div style="background:${categoryColors[category]}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #333;"></div>`
           });
       const marker = L.marker([parseFloat(location.X), parseFloat(location.Y)], { icon: customIcon });
+	  marker.options.category = category;
+	  marker.options.status   = (location.Status || 'Present').toLowerCase();  // “past” or “present”
       marker.on('click', () => {
         updateSidebar(location, allLocations.indexOf(location));
       });
@@ -556,7 +719,13 @@ fetch(apiUrl)
 
     function updateSidebar(location, index) {
       currentIndex = index;
-      document.getElementById("sidebar-intro").style.display = "none";
+      const intro = document.getElementById("sidebar-intro");
+intro.style.display = "none";
+intro.style.position = "absolute";
+intro.style.top = "-9999px";
+intro.style.left = "-9999px";
+intro.style.visibility = "hidden";
+
       document.getElementById("sidebar-content").style.display = "block";
       document.getElementById("sidebar").classList.add("visible");
       const tab = document.getElementById("sidebar-tab");
@@ -632,7 +801,36 @@ const formattedText = rawText
   
       console.log("Sidebar updated for:", location);
     }
-    
+	
+	function showIntro() {
+  const intro = document.getElementById("sidebar-intro");
+  intro.style.display = "block";
+  intro.style.position = "static";
+  intro.style.top = "";
+  intro.style.left = "";
+  intro.style.visibility = "visible";
+
+  document.getElementById("sidebar-content").style.display = "none";
+}
+
+      document.getElementById('fullscreenBtn')
+              .addEventListener('click', () => {
+        const img = document.getElementById('mainImage');
+        if (img.style.display === 'block' && img.requestFullscreen) {
+          img.requestFullscreen();
+        }
+      });
+	  
+	        window.toggleSidebar = () => {
+        const sidebar = document.getElementById('sidebar');
+        const path    = document.getElementById('togglePath');
+        const open    = sidebar.classList.toggle('visible');
+        path.setAttribute('d', open
+          ? 'M9 6l6 6-6 6'   // ◀
+          : 'M15 6l-6 6 6 6'  // ▶
+        );
+      };
+
 function buildCarousel(items) {
   const thumbnailsContainer = document.getElementById("carouselThumbnails");
   const arrowContainer = document.querySelector(".carousel-arrows");
@@ -674,18 +872,7 @@ function buildCarousel(items) {
   });
 }
 
-document.getElementById("fullscreenBtn").addEventListener("click", () => {
-  const mainImage = document.getElementById("mainImage");
-  // or you could target the entire carouselMainContainer
-  // const carouselMain = document.getElementById("carouselMainContainer");
-  
-  if (mainImage.style.display === "block") {
-    // Only fullscreen the image if it's currently visible
-    if (mainImage.requestFullscreen) {
-      mainImage.requestFullscreen();
-    } 
-  }
-});
+
 
 
     function showMedia(index) {
@@ -739,19 +926,20 @@ document.getElementById("fullscreenBtn").addEventListener("click", () => {
       document.getElementById("sidebar").classList.remove("visible");
     }
     
-    function toggleSidebar() {
-      const sidebar = document.getElementById("sidebar");
-      const toggleIcon = document.getElementById("toggleIcon");
-      const isOpen = sidebar.classList.contains("visible");
-  
-      if (isOpen) {
-        sidebar.classList.remove("visible");
-        toggleIcon.style.transform = "rotate(0deg)";
-      } else {
-        sidebar.classList.add("visible");
-        toggleIcon.style.transform = "rotate(180deg)";
-      }
-    }
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  const togglePath = document.getElementById("togglePath");
+  const isOpen = sidebar.classList.contains("visible");
+
+  if (isOpen) {
+    sidebar.classList.remove("visible");
+    togglePath.setAttribute("d", "M15 6l-6 6 6 6"); // ▶
+  } else {
+    sidebar.classList.add("visible");
+    togglePath.setAttribute("d", "M9 6l6 6-6 6"); // ◀
+  }
+}
+
     
     function emphasizeKeywords(text) {
       return text.replace(/\b(PHA|HAC|EPA|Jane Golden|Mural Arts)\b/g, '<strong>$1</strong>');
@@ -764,7 +952,13 @@ document.getElementById("fullscreenBtn").addEventListener("click", () => {
         else if (e.key === "Escape") toggleSidebar();
       }
     });
-  
+	
+window.nextMedia  = nextMedia;
+window.prevMedia  = prevMedia;
+window.nextPoint  = nextPoint;
+window.prevPoint  = prevPoint;
+
+  });
   </script>
 </body>
 </html>
