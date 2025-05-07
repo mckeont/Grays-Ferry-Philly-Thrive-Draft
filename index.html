@@ -564,34 +564,11 @@ map.createPane('labelsPane');
 map.getPane('labelsPane').style.zIndex = 650;
 map.getPane('labelsPane').style.pointerEvents = 'none';
 
-const AboutControl = L.Control.extend({
-  onAdd() {
-    const btn = L.DomUtil.create('button','leaflet-bar leaflet-control');
-    btn.innerHTML = '⬅ About';
-    btn.style.background = '#fce4ec';
-    btn.style.color      = '#6a1b9a';
-    btn.style.fontWeight = '500';
-    btn.onclick = showIntro;
-    L.DomEvent.disableClickPropagation(btn);
-    return btn;
-  }
-});
-map.addControl(new AboutControl({ position: 'bottomleft' }));
-
-
-    const imageUrl = 'jbrew1934.png';
     const imageBounds = [
       [39.903605, -75.235695],
       [39.965321, -75.121852]
     ];
 
-// 1) create the historic‐map overlay
-const historicMap = L.imageOverlay('jbrew1934.png', [
-  [39.903605, -75.235695],
-  [39.965321, -75.121852]
-]);
-
-// 2) pull out the longest segment per street…
 const longestByStreet = {};
 streetsData.features.forEach(f => {
   const n = f.properties.STNAME;
@@ -608,7 +585,6 @@ const filteredStreets = {
   features: Object.values(longestByStreet)
 };
 
-// 3) draw the grey lines
 const streetLines = L.geoJSON(filteredStreets, {
   pane: 'labelsPane',
   style: { color: '#eee', weight: 0.3 }
