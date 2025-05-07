@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gray's Ferry Philly Thrive Map</title>
+  <title>Philly Thrive Map with Unified Carousel</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css">
   <meta http-equiv="Content-Language" content="en">
@@ -16,9 +16,28 @@
       height: 100vh; overflow: hidden;
 	  font-family: 'Inter', sans-serif;
     }
-    #map {
-      width: 100%; height: 100vh;
-    }
+	
+#map {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+}
+
+#aboutBtn {
+  position: fixed;
+  bottom: 20px;
+  left:  20px;
+  z-index: 10001;     /* above your sidebar’s 9000 */
+  background: #fce4ec;
+  color:      #6a1b9a;
+  border:     1px solid #f8bbd0;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-weight: 500;
+  cursor:      pointer;
+}
+
+
     #sidebar {
       position: absolute;
       top: 0; right: 0;
@@ -28,7 +47,7 @@
       background: #fff;
       box-shadow: -2px 0 5px rgba(0,0,0,0.3);
       padding: 20px;
-      z-index: 1000;
+      z-index: 9000;
       transform: translateX(100%);
       transition: transform 0.3s ease;
       display: flex;
@@ -268,7 +287,7 @@
     }
     @media (max-width: 600px) {
       #sidebar {
-        width: 100vw;
+        width: 100%;
         padding: 12px;
       }
       .point-header h2 {
@@ -365,6 +384,7 @@ h1, h2, h3, .time-filter button, .point-header h2 {
 </head>
 <body>
   <div id="map"></div>
+      	<button id="aboutBtn" onclick="showIntro()">⬅ About</button>
 
   <div id="sidebar">
     <div class="scrollable-content">
@@ -397,21 +417,6 @@ h1, h2, h3, .time-filter button, .point-header h2 {
         </div>
         <div id="pointCounter" class="point-counter"></div>
 		
-<button onclick="showIntro()" style="
-  background: #fce4ec;
-  color: #6a1b9a;
-  font-weight: 500;
-  border: 1px solid #f8bbd0;
-  border-radius: 6px;
-  padding: 4px 6px;
-  margin-bottom: 12px;
-  cursor: pointer;
-  width: auto;
-  font-size: 0.9em;
-  transition: background 0.3s ease, color 0.3s ease;
-">
-  ⬅ About
-</button>
 
 	   <div class="carousel-main" id="carouselMainContainer">
   <button 
@@ -452,10 +457,32 @@ h1, h2, h3, .time-filter button, .point-header h2 {
           Your browser does not support the audio element.
         </audio>
         <div id="sidebar-contributor"></div>
+		
+
+		<!-- Add Your Story Button for Each Point -->
+<button onclick="window.open('https://graysferryarchive.com/addyourstory/','_blank')" style="
+  display: block;
+  width: 100%;
+  margin: 20px 0 0;
+  padding: 12px;
+  background: #97E0FF;
+  color: #003c8f;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1em;
+">
+  Know more about this point? Click here to add your story
+</button>
+
       </div>
 
     </div><!-- /.scrollable-content -->
-  </div><!-- /#sidebar -->
+
+  </div>
+
+
 
   <div id="sidebar-tab">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
@@ -480,6 +507,7 @@ h1, h2, h3, .time-filter button, .point-header h2 {
     let carouselItems = [];
     let currentMediaIndex = 0;
     let activePopup = null;
+	
     function convertGoogleDriveImageLink(url) {
       let match = url.match(/(?:\/d\/|id=)([a-zA-Z0-9-_]+)/);
       if (match) {
@@ -532,10 +560,112 @@ const map = L.map('map', {
 });
 map.setView([39.9362, -75.1956], 16);
 
-// Pane customization — must be AFTER map is created
 map.createPane('labelsPane');
 map.getPane('labelsPane').style.zIndex = 650;
 map.getPane('labelsPane').style.pointerEvents = 'none';
+
+const AboutControl = L.Control.extend({
+  onAdd() {
+    const btn = L.DomUtil.create('button','leaflet-bar leaflet-control');
+    btn.innerHTML = '⬅ About';
+    btn.style.background = '#fce4ec';
+    btn.style.color      = '#6a1b9a';
+    btn.style.fontWeight = '500';
+    btn.onclick = showIntro;
+    L.DomEvent.disableClickPropagation(btn);
+    return btn;
+  }
+});
+map.addControl(new AboutControl({ position: 'bottomleft' }));
+
+
+    const imageUrl = 'jbrew1934.png';
+    const imageBounds = [
+      [39.903605, -75.235695],
+      [39.965321, -75.121852]
+    ];
+
+// 1) create the historic‐map overlay
+const historicMap = L.imageOverlay('jbrew1934.png', [
+  [39.903605, -75.235695],
+  [39.965321, -75.121852]
+]);
+
+// 2) pull out the longest segment per street…
+const longestByStreet = {};
+streetsData.features.forEach(f => {
+  const n = f.properties.STNAME;
+  if (!n) return;
+  if (
+    !longestByStreet[n] ||
+    f.properties.Shape_Length > longestByStreet[n].properties.Shape_Length
+  ) {
+    longestByStreet[n] = f;
+  }
+});
+const filteredStreets = {
+  type: 'FeatureCollection',
+  features: Object.values(longestByStreet)
+};
+
+// 3) draw the grey lines
+const streetLines = L.geoJSON(filteredStreets, {
+  pane: 'labelsPane',
+  style: { color: '#eee', weight: 0.3 }
+}).addTo(map);;
+
+// 4) draw the labels with **numeric** orientation
+function labelStreet(feature, layer) {
+  const name = feature.properties.STNAME;
+  if (!name || feature.properties.Shape_Length < 0.002) return;
+
+  const coords = feature.geometry.type === 'MultiLineString'
+    ? feature.geometry.coordinates.flat()
+    : feature.geometry.coordinates;
+
+  layer.setText(name, {
+    repeat: false,
+    center: true,
+    offset: 5,
+    orientation: 0,
+    attributes: {
+      fill: '#444',
+      'font-size': '10px',
+      'font-family': 'Inter, sans-serif',
+      'font-weight': '400',
+      'paint-order': 'stroke',
+      stroke: 'white',
+      'stroke-width': '2'
+    }
+  });
+}  
+
+const streetLabels = L.geoJSON(filteredStreets, {
+  pane: 'labelsPane',
+  onEachFeature: labelStreet
+}).addTo(map);
+
+
+// 5) group them and *then* add to your layer‐control
+const streetsGroup = L.layerGroup([streetLines, streetLabels]).addTo(map);;
+
+const overlays = {
+  'Streets':           streetsGroup
+};
+
+L.control.layers(basemaps, overlays, { position: 'topleft' }).addTo(map);
+
+map.on('zoomend', () => {
+  const zoom = map.getZoom();
+  streetLabels.eachLayer(l => {
+    const el = l._textNode;
+    if (el) {
+      el.style.display = zoom >= 15 ? 'block' : 'none';
+    }
+  });
+});
+
+
 map.getPane('markerPane').style.zIndex = 700;
 const categoryColors = {
   "Parks and Green Spaces": "limegreen",
@@ -545,7 +675,7 @@ const categoryColors = {
   "Community Buildings": "lightblue",
   "Environmental Impacts": "crimson",
   "Streets": "gray",
-  "Miscellaneous": "#d3dce6"  
+  "Miscellaneous": "#d3dce6"  // changed here
 };
 
 const categoryOrder = [
@@ -563,52 +693,18 @@ const categoryOrder = [
 	let visibleCategories = new Set(categoryOrder);
 
 
-const streetsLayer = L.geoJSON(streetsData, {
-  style: () => ({ color: categoryColors['Streets'], weight: 2 })
-});
 
-const labeledSegments = new Set();
-
-const streetLabels = L.geoJSON(streetsData, {
-  style: { color: '#ccc', weight: 1 },
-  onEachFeature: (feature, layer) => {
-    const name = feature.properties?.STNAME;
-    if (!name || labeledSegments.has(name)) return;
-    labeledSegments.add(name);
-    layer.setText(name, {
-      repeat: false,
-      center: true,
-      offset: -3,
-      attributes: {
-        fill: '#444',
-        'font-size': '10px',
-        'font-family': 'Roboto Condensed, sans-serif'
-      }
-    });
-  }
-});
-
-const streetsGroup = L.layerGroup([streetsLayer, streetLabels]);
 
 document.getElementById('carouselPrev').addEventListener('click', prevMedia);
 document.getElementById('carouselNext').addEventListener('click', nextMedia);
 
-    const imageUrl = 'jbrew1934.png';
-    const imageBounds = [
-      [39.903605, -75.235695],
-      [39.965321, -75.121852]
-    ];
-    const historicMap = L.imageOverlay(imageUrl, imageBounds, {});
-    const overlays = { 
-  "1934 Historic Map": historicMap,
-  "Streets": streetsGroup
-};
-    L.control.layers(basemaps, overlays, { position: "topleft" }).addTo(map);
+
 
 let usedCategories = new Set();
 const legend = L.control({ position: 'bottomleft' });
 
 legend.onAdd = function(map) {
+  // 1) build container + inject HTML
   const container = L.DomUtil.create('div', 'legend leaflet-bar');
   container.innerHTML = `
     <div class="time-filter">
@@ -620,6 +716,7 @@ legend.onAdd = function(map) {
     <div id="category-filter"></div>
   `;
 
+ 
   container.querySelectorAll('.time-filter button').forEach(btn => {
     btn.addEventListener('click', e => {
       container.querySelector('.time-filter .active').classList.remove('active');
@@ -629,6 +726,7 @@ legend.onAdd = function(map) {
     });
   });
 
+  
   const catDiv = container.querySelector('#category-filter');
   categoryOrder.forEach(cat => {
     if (!usedCategories.has(cat)) return;
@@ -642,6 +740,7 @@ legend.onAdd = function(map) {
     `;
   });
 
+ 
   container.querySelectorAll('#category-filter input').forEach(cb => {
     cb.addEventListener('change', () => {
       visibleCategories = new Set(
@@ -657,6 +756,8 @@ legend.onAdd = function(map) {
 
 legend.addTo(map);
 
+
+
 function refreshMarkers() {
   markersArray.forEach(marker => {
     const cat    = marker.options.category;
@@ -669,8 +770,13 @@ function refreshMarkers() {
   });
 }
 
+
+
     const categoryIcons = {};
+	
+
     const apiUrl = "https://script.google.com/macros/s/AKfycbzyrIcLZaFyYhwUGviH9bYw5GOzKGooPomy2arJmi2D4V-G8-QF-yME-gqcnaSHUeDYVA/exec";
+
 
 fetch(apiUrl)
   .then(response => response.json())
@@ -678,9 +784,11 @@ fetch(apiUrl)
     allLocations = data;
     data.forEach((location, index) => {
       if (!location.X || !location.Y) return;
+      // Use "Miscellaneous" as the fallback:
       const category = (location["Category/Layer"] && location["Category/Layer"].trim() !== "")
                          ? location["Category/Layer"].trim()
                          : "Miscellaneous";
+      // Record that this category is in use:
       usedCategories.add(category);
       
       if (!categoryIcons[category] && location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")) {
@@ -731,6 +839,8 @@ intro.style.visibility = "hidden";
 
       document.getElementById("sidebar-content").style.display = "block";
       document.getElementById("sidebar").classList.add("visible");
+	  document.getElementById("aboutBtn").style.display = "inline-block";
+
       const tab = document.getElementById("sidebar-tab");
       tab.innerHTML = `
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
@@ -751,8 +861,7 @@ const formattedText = rawText
   .map(para => {
     const trimmed = para.trim();
     const withEmphasis = emphasizeKeywords(trimmed);
-    // Only wrap as a blockquote if the entire paragraph is wrapped in quotes
-    // or if it contains "et al." (as you wish to emphasize those parts)
+
     if (/^["“].+["”]$/.test(trimmed) || /et al\./i.test(trimmed)) {
       return `<blockquote>${withEmphasis}</blockquote>`;
     }
@@ -763,6 +872,7 @@ const formattedText = rawText
       document.getElementById("sidebar-text").innerHTML = formattedText;
       document.getElementById("sidebar-contributor").textContent = location["Contributed by"] ? "Contributed by: " + location["Contributed by"] : "";
       
+      // Handle Audio (if available)
       if (location.Audio && location.Audio.includes("github.com")) {
         document.getElementById("sidebar-audio").style.display = "block";
         document.getElementById("audio-src").src = location.Audio;
@@ -794,8 +904,6 @@ for (let i = 1; i <= 14; i++) {
     });
   }
 }
-
-      
       buildCarousel(carouselItems);
       updatePointCounter();
       map.panTo([parseFloat(location.X), parseFloat(location.Y)]);
@@ -813,18 +921,12 @@ for (let i = 1; i <= 14; i++) {
         .openOn(map);
   
       console.log("Sidebar updated for:", location);
+	  document.getElementById("aboutBtn").style.display = "block";
     }
 	
-	function showIntro() {
-  const intro = document.getElementById("sidebar-intro");
-  intro.style.display = "block";
-  intro.style.position = "static";
-  intro.style.top = "";
-  intro.style.left = "";
-  intro.style.visibility = "visible";
+	
+	
 
-  document.getElementById("sidebar-content").style.display = "none";
-}
 
       document.getElementById('fullscreenBtn')
               .addEventListener('click', () => {
@@ -862,7 +964,6 @@ function buildCarousel(items) {
     }
     return;
   } else {
-    // If we do have images/videos, show the arrow container
     if (arrowContainer) {
       arrowContainer.style.display = "flex";
     }
@@ -870,7 +971,7 @@ function buildCarousel(items) {
 
   currentMediaIndex = 0;
   showMedia(currentMediaIndex);
-	
+
   items.forEach((item, idx) => {
     const thumb = document.createElement("img");
     thumb.src = item.type === "image"
@@ -880,6 +981,10 @@ function buildCarousel(items) {
     thumbnailsContainer.appendChild(thumb);
   });
 }
+
+
+
+
     function showMedia(index) {
       if (carouselItems.length === 0) return;
       currentMediaIndex = (index + carouselItems.length) % carouselItems.length;
@@ -931,6 +1036,20 @@ function buildCarousel(items) {
       document.getElementById("sidebar").classList.remove("visible");
     }
     
+	function showIntro() {
+  const intro = document.getElementById("sidebar-intro");
+  intro.style.display = "block";
+  intro.style.position = "static";
+  intro.style.top = "";
+  intro.style.left = "";
+  intro.style.visibility = "visible";
+  
+  document.getElementById("sidebar-content").style.display = "none";
+  document.getElementById("aboutBtn").style.display = "none";
+
+}
+
+    
     function emphasizeKeywords(text) {
       return text.replace(/\b(PHA|HAC|EPA|Jane Golden|Mural Arts)\b/g, '<strong>$1</strong>');
     }
@@ -943,14 +1062,20 @@ function buildCarousel(items) {
       }
     });
 	
+	
+	
 window.nextMedia  = nextMedia;
 window.prevMedia  = prevMedia;
 window.nextPoint  = nextPoint;
 window.prevPoint  = prevPoint;
-window.showIntro  = showIntro; 
+window.showIntro  = showIntro;
+
+});
+
 document.getElementById("sidebar").classList.add("visible");
-document.getElementById("togglePath").setAttribute("d", "M9 6l6 6-6 6");  // ◀
-  });
+document.getElementById("togglePath").setAttribute("d", "M9 6l6 6-6 6");
+
+
   </script>
 </body>
 </html>
