@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>Philly Thrive Map with Unified Carousel</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css">
   <meta http-equiv="Content-Language" content="en">
   <meta name="google" content="notranslate">
+  
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
@@ -104,7 +105,7 @@ h1, h2, h3, .point-header h2, .time-filter button {
 .carousel-arrow:hover { opacity: 1; }
 
 .carousel-thumbnails {
-  display: flex; gap: 5px; overflow-x: auto; margin-bottom: 10px;
+  display: flex; gap: 5px; overflow-x: auto; margin-bottom: 14px; padding-bottom: 4px;
 }
 .carousel-thumbnails img {
   width: 60px; height: 60px; object-fit: cover;
@@ -138,8 +139,14 @@ h1, h2, h3, .point-header h2, .time-filter button {
   font-size: 0.95em; font-family: Georgia, 'Times New Roman', serif;
   line-height: 1.6; color: #333; padding: 4px 0;
 }
-#sidebar-text p { text-indent: 1.25em; margin-bottom: 1em; }
-#sidebar-text p:first-of-type { font-weight: 500; color: #222; }
+#sidebar-text p {
+  margin-bottom: 1em;
+}
+#sidebar-text p:first-of-type {
+  font-weight: normal;
+  color: #333;
+}
+
 #sidebar-text blockquote {
   margin: 10px 0; padding-left: 12px;
   border-left: 3px solid #ccc; color: #666; font-style: italic;
@@ -150,6 +157,7 @@ h1, h2, h3, .point-header h2, .time-filter button {
   background: #f9f9f9; padding: 6px;
   box-shadow: 0 0 3px rgba(0,0,0,0.1);
 }
+
 .time-filter {
   display: flex; background: #ddd;
   border-radius: 20px; overflow: hidden; margin-bottom: 8px;
@@ -213,10 +221,28 @@ h1, h2, h3, .point-header h2, .time-filter button {
 }
 
 @media (max-width: 600px) {
-  #sidebar { width: 100%; padding: 12px; }
-  .point-header h2 { font-size: 1.1em; }
-  .carousel-arrow { padding: 4px 8px; font-size: 14px; }
+  #sidebar {
+    width: 100%;
+    max-width: none;
+    padding: 12px;
+  }
+  .carousel-thumbnails img {
+    width: 48px;
+    height: 48px;
+  }
+  .nav-button {
+    padding: 4px 8px;
+    font-size: 16px;
+  }
+  .btn-story {
+    font-size: 0.95em;
+    padding: 10px;
+  }
+  #sidebar h2 {
+    font-size: 1.1em;
+  }
 }
+
 
 #fullscreenBtn {
   position: absolute;
@@ -250,6 +276,20 @@ h1, h2, h3, .point-header h2, .time-filter button {
   display: none;
 }
 
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+.video-wrapper iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+}
 
 </style>
 
@@ -295,10 +335,15 @@ h1, h2, h3, .point-header h2, .time-filter button {
 	   <div class="carousel-main" id="carouselMainContainer">
           <img id="mainImage" style="display: none;" alt="Main Media">
 		  <button id="exitFullscreenBtn">×</button>
-		  <button id="fullscreenBtn" title="View Fullscreen">🔍</button>
-          <iframe id="mainVideo" style="display: none;" width="100%" height="200" frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-          </iframe>
+		  <button id="fullscreenBtn" title="View Fullscreen">[ ]</button>
+<div id="mainVideoWrapper" class="video-wrapper" style="display:none;">
+  <iframe id="mainVideo" frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+  </iframe>
+</div>
+
+
+
           <div id="mediaCaption" style="margin-top:4px; font-size:0.9em; color:#555;"></div>
           <div class="carousel-counter" id="carouselCounter">0 of 0</div>
           <div class="carousel-arrows">
@@ -513,8 +558,13 @@ const categoryOrder = [
 	let currentPeriod     = 'all';
 	let visibleCategories = new Set(categoryOrder);
 
+
+
+
 document.getElementById('carouselPrev').addEventListener('click', prevMedia);
 document.getElementById('carouselNext').addEventListener('click', nextMedia);
+
+
 
 let usedCategories = new Set();
 const legend = L.control({ position: 'bottomleft' });
@@ -571,6 +621,9 @@ legend.onAdd = function(map) {
 };
 
 legend.addTo(map);
+
+
+
 function refreshMarkers() {
   markersArray.forEach(marker => {
     const cat    = marker.options.category;
@@ -582,6 +635,9 @@ function refreshMarkers() {
     else      map.removeLayer(marker);
   });
 }
+
+
+
     const categoryIcons = {};
 	
 
@@ -717,7 +773,7 @@ for (let i = 1; i <= 14; i++) {
       buildCarousel(carouselItems);
       updatePointCounter();
 const latlng = L.latLng(parseFloat(location.X), parseFloat(location.Y));
-const offset = map.getSize().x * -0.30; // shift 25% of map width to the left
+const offset = map.getSize().x * (window.innerWidth <= 600 ? -0.4 : -0.3);
 const targetPoint = map.latLngToContainerPoint(latlng).subtract([offset, 0]);
 const newLatLng = map.containerPointToLatLng(targetPoint);
 map.panTo(newLatLng);
@@ -737,7 +793,9 @@ map.panTo(newLatLng);
       console.log("Sidebar updated for:", location);
 	  document.getElementById("aboutBtn").style.display = "block";
     }
-		
+	
+	
+	
 const aboutBtn = document.getElementById("aboutBtn");
 aboutBtn.style.opacity = "1";
 aboutBtn.style.pointerEvents = "auto";
@@ -817,7 +875,13 @@ function buildCarousel(items) {
     thumbnailsContainer.appendChild(thumb);
   });
 }
+
+
+
+
     function showMedia(index) {
+document.getElementById("mainVideo").src = "about:blank";
+
       if (carouselItems.length === 0) return;
       currentMediaIndex = (index + carouselItems.length) % carouselItems.length;
       const item = carouselItems[currentMediaIndex];
@@ -829,7 +893,7 @@ const fullscreenBtn = document.getElementById("fullscreenBtn");
 
 mainVideo.src = "";
 mainImage.style.display = "none";
-mainVideo.style.display = "none";
+document.getElementById("mainVideoWrapper").style.display = "none";
 fullscreenBtn.style.display = "none";
 
 if (item.type === "image") {
@@ -846,8 +910,11 @@ if (item.type === "image") {
     }
   };
 } else if (item.type === "video") {
-  mainVideo.src = "https://www.youtube-nocookie.com/embed/" + item.youtubeId;
-  mainVideo.style.display = "block";
+  const ytWrapper = document.getElementById("mainVideoWrapper");
+  const ytIframe = document.getElementById("mainVideo");
+
+  ytWrapper.style.display = "block";
+  ytIframe.src = `https://www.youtube-nocookie.com/embed/${item.youtubeId}?rel=0&modestbranding=1`;
 }
 
       captionEl.textContent = item.desc || "";
@@ -880,7 +947,10 @@ if (item.type === "image") {
     
     function closeSidebar() {
       document.getElementById("sidebar").classList.remove("visible");
-    }   
+    }
+	
+	
+    
 function showIntro() {
   const intro = document.getElementById("sidebar-intro");
   const aboutBtn = document.getElementById("aboutBtn");
@@ -895,6 +965,9 @@ function showIntro() {
   aboutBtn.style.opacity = "0.5";
   aboutBtn.style.pointerEvents = "none";
 }
+
+
+    
     function emphasizeKeywords(text) {
       return text.replace(/\b(PHA|HAC|EPA|Jane Golden|Mural Arts)\b/g, '<strong>$1</strong>');
     }
@@ -905,7 +978,10 @@ function showIntro() {
         else if (e.key === "ArrowLeft") prevMedia();
         else if (e.key === "Escape") toggleSidebar();
       }
-    });	
+    });
+	
+	
+	
 window.nextMedia  = nextMedia;
 window.prevMedia  = prevMedia;
 window.nextPoint  = nextPoint;
@@ -924,6 +1000,7 @@ window.addEventListener('load', () => {
   btn.style.opacity = '1';
   btn.style.pointerEvents = 'auto';
 });
+
   </script>
 </body>
 </html>
