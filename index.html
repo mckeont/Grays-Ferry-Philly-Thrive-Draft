@@ -10,381 +10,254 @@
   <meta name="google" content="notranslate">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
 
-  <style>
-    html, body {
-      margin: 0; padding: 0;
-      height: 100vh; overflow: hidden;
-	  font-family: 'Inter', sans-serif;
-    }
-	
-#map {
-  width: 100%;
-  height: 100vh;
-  position: relative;
+<style>
+html, body, #map {
+  margin: 0; padding: 0; height: 100vh; overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
+#map { width: 100%; position: relative; }
+
+h1, h2, h3, .point-header h2, .time-filter button {
+  font-family: 'Shippori Mincho', serif;
+}
+#sidebar h2, #sidebar p, #sidebar .section, #sidebar-content > *:first-child {
+  margin-top: 10px;
 }
 
 #aboutBtn {
-  position: fixed;
-  bottom: 20px;
-  left:  20px;
-  z-index: 10001;     /* above your sidebar’s 9000 */
-  background: #fce4ec;
-  color:      #6a1b9a;
-  border:     1px solid #f8bbd0;
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-weight: 500;
-  cursor:      pointer;
+  position: fixed; bottom: 10px; left: 8px; z-index: 410;
+  background: #fce4ec; color: #6a1b9a; border: 1px solid #f8bbd0;
+  border-radius: 6px; padding: 4px 10px; font-weight: 500;
+  cursor: pointer; width: 210px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: opacity 0.3s ease; display: block;
 }
 
-
-    #sidebar {
-      position: absolute;
-      top: 0; right: 0;
-      width: 100%;
-      max-width: 350px;
-      height: 100%;
-      background: #fff;
-      box-shadow: -2px 0 5px rgba(0,0,0,0.3);
-      padding: 20px;
-      z-index: 9000;
-      transform: translateX(100%);
-      transition: transform 0.3s ease;
-      display: flex;
-      flex-direction: column;
-    }
-    #sidebar.visible {
-      transform: translateX(0);
-    }
-    #sidebar-tab {
-      pointer-events: auto;
-    }
-    .close-btn {
-      position: absolute;
-      top: 10px; right: 10px;
-      border: none; background: none;
-      font-size: 20px; cursor: pointer;
-    }
-    .scrollable-content {
-      flex-grow: 1;
-      overflow-y: auto;
-      padding-bottom: 20px;
-      -webkit-overflow-scrolling: touch;
-    }
-    .point-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 10px;
-      gap: 8px;
-    }
-    .point-header h2 {
-      flex-grow: 1;
-      text-align: center;
-      font-size: 1.3em;
-      margin: 0;
-      font-weight: bold;
-	    font-family: 'Shippori Mincho', serif;
-    }
-    .nav-button {
-      background: #6a1b9a;
-      color: #fff;
-      border: none;
-      border-radius: 50%;
-      padding: 6px 10px;
-      font-size: 18px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.2);
-      cursor: pointer;
-    }
-    .nav-button:hover {
-      background: #4a148c;
-    }
-    .point-counter {
-      text-align: center;
-      margin-top: 4px;
-      font-weight: bold;
-      color: #333;
-    }
-    .carousel-main {
-      position: relative;
-      text-align: center;
-      margin-bottom: 10px;
-    }
-    .carousel-main img,
-    .carousel-main iframe {
-      width: 100%;
-      border-radius: 5px;
-    }
-    .carousel-counter {
-      margin-top: 5px;
-      font-size: 0.9em;
-      color: #555;
-    }
-    .carousel-arrows {
-      display: flex;
-      justify-content: center;
-      margin-top: 8px;
-    }
-    .carousel-arrow {
-      background: #e0d4ec;
-      color: #4a148c;
-      border: 1px solid #b39ddb;
-      border-radius: 4px;
-      font-weight: bold;
-      padding: 4px 12px;
-      font-size: 16px;
-      margin: 0 5px;
-      cursor: pointer;
-    }
-    .carousel-arrow:hover {
-      opacity: 1;
-    }
-    .carousel-thumbnails {
-      display: flex;
-      gap: 5px;
-      overflow-x: auto;
-      margin-bottom: 10px;
-    }
-    .carousel-thumbnails img {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: 4px;
-      cursor: pointer;
-      opacity: 0.8;
-      border: 2px solid transparent;
-      transition: opacity 0.2s, border 0.2s;
-    }
-    .carousel-thumbnails img:hover {
-      opacity: 1;
-    }
-    .carousel-thumbnails img.active-thumb {
-      border: 2px solid #4a148c;
-      opacity: 1;
-    }
-    #sidebar h2 {
-      margin-top: 10px;
-    }
-    #sidebar p,
-    #sidebar .section {
-      margin-top: 10px;
-    }
-    #sidebar-contributor {
-      font-size: 0.85em;
-      color: #555;
-      font-style: italic;
-      margin-top: 15px;
-      text-align: right;
-      opacity: 0.8;
-    }
-    #sidebar-address {
-      font-size: 0.95em;
-      margin-top: 8px;
-	  display: none;
-    }
-	
-    #sidebar-text p:first-of-type {
-      font-weight: 500;
-      color: #222;
-    }
-	
-
-	h1, h2, h3, .point-header h2 {
-  font-family: 'Shippori Mincho', serif;
+#sidebar {
+  position: absolute; top: 0; right: 0; width: 100%; max-width: 350px;
+  height: 100%; background: #fff; z-index: 9000;
+  transform: translateX(100%); transition: transform 0.3s ease;
+  display: flex; flex-direction: column; box-shadow: -2px 0 5px rgba(0,0,0,0.3);
 }
-    
-    #sidebar-text {
-      font-size: 0.95em;
-      font-family: Georgia, 'Times New Roman', serif;
-      line-height: 1.6;
-      color: #333;
-      padding: 4px 0;
-    }
-    #sidebar-text p {
-      text-indent: 1.25em;
-      margin-bottom: 1em;
-    }
-    #sidebar-text blockquote {
-      margin: 10px 0;
-      padding-left: 12px;
-      border-left: 3px solid #ccc;
-      color: #666;
-      font-style: italic;
-    }
-    
-    #sidebar-tab.hidden {
-      display: none;
-    }
-    
-    #sidebar-audio {
-      margin-top: 12px;
-      border-radius: 4px;
-      background: #f9f9f9;
-      padding: 6px;
-      box-shadow: 0 0 3px rgba(0,0,0,0.1);
-    }
-    #sidebar-tab {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      width: 40px;
-      height: 18px;
-      background: #f06292;
-      color: #fff;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1100;
-      cursor: pointer;
-      transition: background 0.3s ease, transform 0.3s ease;
-    }
-    #sidebar-tab:hover {
-      background: #ec407a;
-    }
-    #sidebar-tab svg {
-      width: 20px;
-      height: 20px;
-      stroke: white;
-      transition: transform 0.3s ease;
-    }
-    #sidebar-tab svg:hover {
-      stroke: #ddd;
-    }
-    #sidebar-tab.collapsed {
-      right: 0;
-    }
-    .legend {
-      background: white;
-      padding: 10px;
-      line-height: 18px;
-      color: #555;
-      border-radius: 5px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.3);
-    }
-    .legend i {
-      width: 10px;
-      height: 10px;
-      float: left;
-      margin-right: 8px;
-      opacity: 0.7;
-    }
-    
-    .leaflet-popup.active-label {
-      background-color: #fff;
-      color: #333;
-      border-radius: 6px;
-      font-weight: 600;
-      padding: 4px 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      border: none;
-    }
-    .leaflet-popup-content-wrapper {
-      padding: 0;
-    }
-    .leaflet-popup-content {
-      margin: 6px;
-    }
-    @media (max-width: 600px) {
-      #sidebar {
-        width: 100%;
-        padding: 12px;
-      }
-      .point-header h2 {
-        font-size: 1.1em;
-		font-family: 'Shippori Mincho', serif;
-      }
-      .carousel-arrow {
-        padding: 4px 8px;
-        font-size: 14px;
-      }
-    }
-	
-	#sidebar-intro {
-  text-align: center;
-  padding: 0;
-}
+#sidebar.visible { transform: translateX(0); }
+#sidebar-tab.hidden { display: none; }
 
-#sidebar-intro { display: block; }
-#sidebar-content { display: none; }
-#sidebar.is-point-view #sidebar-intro { display: none; }
-#sidebar.is-point-view #sidebar-content { display: block; }
-#sidebar.intro-view .scrollable-content { padding-top:0; }
-
-
-#sidebar-intro > div:first-child {
-  position: relative;
+#sidebar-tab {
+  position: fixed; top: 10px; right: 10px; width: 40px; height: 18px;
+  background: #f06292; color: #fff; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1100; cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
 }
-#sidebar-intro img {
-  width: 100%;
-  height: auto;
-  max-height: 280px;
-  object-fit: cover;
-  border-radius: 8px 8px 0 0;
-}
-#sidebar-content {
-  margin-top: 0;
-  padding-top: 0;
+#sidebar-tab:hover { background: #ec407a; }
+#sidebar-tab svg { width: 20px; height: 20px; stroke: white; transition: transform 0.3s ease; }
+#sidebar-tab svg:hover { stroke: #ddd; }
+#sidebar-tab.collapsed { right: 0; }
+
+.close-btn {
+  position: absolute; top: 10px; right: 10px;
+  border: none; background: none; font-size: 20px; cursor: pointer;
 }
 
 .scrollable-content {
-  padding-top: 0;
+  flex-grow: 1; overflow-y: auto;
+  padding: 0 15px 10px; -webkit-overflow-scrolling: touch;
 }
 
-#sidebar-content > *:first-child {
-  margin-top: 0 !important;
+.point-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 10px; gap: 8px;
 }
-body, p, #sidebar, .leaflet-control .legend {
-  font-family: 'Inter', sans-serif;
+.point-header h2 {
+  flex-grow: 1; text-align: center; font-size: 1.3em; font-weight: bold;
 }
-h1, h2, h3, .time-filter button, .point-header h2 {
-  font-family: 'Shippori Mincho', serif;
+
+.nav-button {
+  background: #6a1b9a; color: #fff; border: none; border-radius: 50%;
+  padding: 6px 10px; font-size: 18px; cursor: pointer;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+.nav-button:hover { background: #4a148c; }
+
+.point-counter {
+  text-align: center; margin-top: 4px; font-weight: bold; color: #333;
+}
+
+.carousel-main {
+  position: relative; text-align: center; margin-bottom: 10px;
+}
+.carousel-main img, .carousel-main iframe {
+  width: 100%; border-radius: 5px;
+}
+
+.carousel-counter {
+  margin-top: 5px; font-size: 0.9em; color: #555;
+}
+.carousel-arrows {
+  display: flex; justify-content: center; margin-top: 8px;
+}
+.carousel-arrow {
+  background: #e0d4ec; color: #4a148c; border: 1px solid #b39ddb;
+  border-radius: 4px; font-weight: bold; padding: 4px 12px;
+  font-size: 16px; margin: 0 5px; cursor: pointer;
+}
+.carousel-arrow:hover { opacity: 1; }
+
+.carousel-thumbnails {
+  display: flex; gap: 5px; overflow-x: auto; margin-bottom: 10px;
+}
+.carousel-thumbnails img {
+  width: 60px; height: 60px; object-fit: cover;
+  border-radius: 4px; cursor: pointer; opacity: 0.8;
+  border: 2px solid transparent; transition: opacity 0.2s, border 0.2s;
+}
+.carousel-thumbnails img:hover,
+.carousel-thumbnails img.active-thumb {
+  opacity: 1;
+}
+.carousel-thumbnails img.active-thumb {
+  border: 2px solid #4a148c;
+}
+
+#fullscreenBtn {
+  position: absolute;
+  top: 8px; right: 8px; z-index: 2;
+  background: rgba(0,0,0,0.4); color: #fff;
+  border: none; border-radius: 4px;
+  padding: 2px 6px; cursor: pointer;
+}
+
+#sidebar-address {
+  font-size: 0.95em; margin-top: 8px; display: none;
+}
+#sidebar-contributor {
+  font-size: 0.85em; color: #555; font-style: italic;
+  margin-top: 15px; text-align: right; opacity: 0.8;
+}
+#sidebar-text {
+  font-size: 0.95em; font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1.6; color: #333; padding: 4px 0;
+}
+#sidebar-text p { text-indent: 1.25em; margin-bottom: 1em; }
+#sidebar-text p:first-of-type { font-weight: 500; color: #222; }
+#sidebar-text blockquote {
+  margin: 10px 0; padding-left: 12px;
+  border-left: 3px solid #ccc; color: #666; font-style: italic;
+}
+
+#sidebar-audio {
+  margin-top: 12px; border-radius: 4px;
+  background: #f9f9f9; padding: 6px;
+  box-shadow: 0 0 3px rgba(0,0,0,0.1);
 }
 .time-filter {
-  display: flex;
-  background: #ddd;
-  border-radius: 20px;
-  overflow: hidden;
-  margin-bottom: 8px;
+  display: flex; background: #ddd;
+  border-radius: 20px; overflow: hidden; margin-bottom: 8px;
 }
 .time-filter button {
-  flex: 1;
-  border: none;
-  padding: 6px 12px;
-  background: none;
-  cursor: pointer;
-  font-size: 0.9em;
+  flex: 1; border: none; padding: 6px 12px; background: none;
+  cursor: pointer; font-size: 0.9em;
 }
-.time-filter button.active {
-  background: #f9c66c;
+.time-filter button.active { background: #f9c66c; }
+
+.legend {
+  position: fixed; bottom: 35px; left: 3px;
+  background: white; padding: 10px; line-height: 18px;
+  color: #555; border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3); z-index: 400;
+}
+.legend i {
+  width: 10px; height: 10px; float: left;
+  margin-right: 8px; opacity: 0.7;
 }
 .legend label {
-  display: flex;
-  align-items: center;
-  margin-bottom: 4px;
-  cursor: pointer;
+  display: flex; align-items: center; margin-bottom: 4px; cursor: pointer;
 }
-.legend label input {
-  margin-right: 6px;
+.legend label input { margin-right: 6px; }
+
+.leaflet-popup.active-label {
+  background: #fff; color: #333; border-radius: 6px;
+  font-weight: 600; padding: 4px 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15); border: none;
 }
+.leaflet-popup-content-wrapper { padding: 0; }
+.leaflet-popup-content { margin: 6px; }
 
 .leaflet-tooltip.marker-tooltip {
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  color: #333;
-  padding: 4px 8px;
-  font-size: 0.85em;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-  pointer-events: none;
-  z-index: 10000 !important;  /* Force it above markers */
+  background: #fff; border: 1px solid #ccc; border-radius: 4px;
+  color: #333; padding: 4px 8px; font-size: 0.85em;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  pointer-events: none; z-index: 10000 !important;
 }
 
-  </style>
+/* Sidebar intro content */
+#sidebar-intro { text-align: center; padding: 0; display: block; }
+#sidebar-intro p:last-of-type { margin-bottom: 40px; }
+#sidebar-intro > div:first-child { position: relative; }
+#sidebar-intro img {
+  width: 100%; height: auto; max-height: 280px;
+  object-fit: cover; border-radius: 8px 8px 0 0;
+}
+#sidebar-content {
+  margin-top: 0; padding-top: 0; display: none;
+}
+#sidebar.is-point-view #sidebar-intro { display: none; }
+#sidebar.is-point-view #sidebar-content { display: block; }
+#sidebar.intro-view .scrollable-content { padding-top: 0; }
+
+/* Reusable Button Style */
+.btn-story {
+  display: block; width: 100%; margin: 14px 0; padding: 12px;
+  background: #97E0FF; color: #003c8f; font-weight: bold;
+  border: none; border-radius: 8px; cursor: pointer; font-size: 1em;
+}
+
+@media (max-width: 600px) {
+  #sidebar { width: 100%; padding: 12px; }
+  .point-header h2 { font-size: 1.1em; }
+  .carousel-arrow { padding: 4px 8px; font-size: 14px; }
+}
+
+#fullscreenBtn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 1em;
+  cursor: pointer;
+  display: none;
+  z-index: 5;
+}
+#fullscreenBtn:hover {
+  background: rgba(0,0,0,0.7);
+}
+
+#exitFullscreenBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  font-size: 20px;
+  padding: 2px 8px;
+  cursor: pointer;
+  display: none;
+}
+
+
+</style>
+
+
 </head>
 <body>
   <div id="map"></div>
-      	<button id="aboutBtn" onclick="showIntro()">⬅ About</button>
+      	<button id="aboutBtn" onclick="showIntro()"> About</button>
 
   <div id="sidebar">
     <div class="scrollable-content">
@@ -400,9 +273,10 @@ h1, h2, h3, .time-filter button, .point-header h2 {
           <p>Click on any point on the map to explore the neighborhood past and present.</p>
           <p>In the Legend in the bottom left corner, click the button to see all points, old points, or current points. </p>
           <p>You can contribute to this map! Click the button below to have a point added to the map, or a story you have about a current point. </p>
-          <button onclick="window.open('https://graysferryarchive.com/addyourstory/','_blank')" style="display:block;width:100%;margin:14px 0;padding:12px;background:#97E0FF;color:#003c8f;font-weight:bold;border:none;border-radius:8px;cursor:pointer">
-            Know more about a point? Click here to add your story
-          </button>
+         <button class="btn-story" onclick="window.open('https://graysferryarchive.com/addyourstory/','_blank')">
+			Know more about a point? Click here to add your story
+		 </button>
+
           <hr style="margin:24px 0;border:none;border-top:1px solid #ddd">
           <p>Did you know that Grays Ferry was named after George Gray? His ferry company operated the Lower Ferry, or Gray’s Ferry, in the mid-18th century. The family owned land on either side of the Schuylkill River and maintained a floating bridge across the river. Prior to the arrival of Europeans, the land was stewarded by the Lenape people for thousands of years. </p>
           <p>This map contains points from the past 110 years of Grays Ferry history. These points have been contributed by residents and former residents. Some points contain photos from historical archive sources, like libraries and government records. </p>
@@ -419,25 +293,9 @@ h1, h2, h3, .time-filter button, .point-header h2 {
 		
 
 	   <div class="carousel-main" id="carouselMainContainer">
-  <button 
-    id="fullscreenBtn" 
-    style="
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      z-index: 2;
-      background: rgba(0,0,0,0.4);
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 2px 6px;
-      cursor: pointer;
-    "
-    title="View Fullscreen">
-    ⛶
-  </button>
-  
           <img id="mainImage" style="display: none;" alt="Main Media">
+		  <button id="exitFullscreenBtn">×</button>
+		  <button id="fullscreenBtn" title="View Fullscreen">🔍</button>
           <iframe id="mainVideo" style="display: none;" width="100%" height="200" frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
           </iframe>
@@ -459,20 +317,7 @@ h1, h2, h3, .time-filter button, .point-header h2 {
         <div id="sidebar-contributor"></div>
 		
 
-		<!-- Add Your Story Button for Each Point -->
-<button onclick="window.open('https://graysferryarchive.com/addyourstory/','_blank')" style="
-  display: block;
-  width: 100%;
-  margin: 20px 0 0;
-  padding: 12px;
-  background: #97E0FF;
-  color: #003c8f;
-  font-weight: bold;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1em;
-">
+<button class="btn-story" onclick="window.open('https://graysferryarchive.com/addyourstory/','_blank')">
   Know more about this point? Click here to add your story
 </button>
 
@@ -668,13 +513,8 @@ const categoryOrder = [
 	let currentPeriod     = 'all';
 	let visibleCategories = new Set(categoryOrder);
 
-
-
-
 document.getElementById('carouselPrev').addEventListener('click', prevMedia);
 document.getElementById('carouselNext').addEventListener('click', nextMedia);
-
-
 
 let usedCategories = new Set();
 const legend = L.control({ position: 'bottomleft' });
@@ -731,9 +571,6 @@ legend.onAdd = function(map) {
 };
 
 legend.addTo(map);
-
-
-
 function refreshMarkers() {
   markersArray.forEach(marker => {
     const cat    = marker.options.category;
@@ -745,9 +582,6 @@ function refreshMarkers() {
     else      map.removeLayer(marker);
   });
 }
-
-
-
     const categoryIcons = {};
 	
 
@@ -882,7 +716,11 @@ for (let i = 1; i <= 14; i++) {
 }
       buildCarousel(carouselItems);
       updatePointCounter();
-      map.panTo([parseFloat(location.X), parseFloat(location.Y)]);
+const latlng = L.latLng(parseFloat(location.X), parseFloat(location.Y));
+const offset = map.getSize().x * -0.30; // shift 25% of map width to the left
+const targetPoint = map.latLngToContainerPoint(latlng).subtract([offset, 0]);
+const newLatLng = map.containerPointToLatLng(targetPoint);
+map.panTo(newLatLng);
       if (activePopup) {
         map.removeLayer(activePopup);
       }
@@ -899,9 +737,10 @@ for (let i = 1; i <= 14; i++) {
       console.log("Sidebar updated for:", location);
 	  document.getElementById("aboutBtn").style.display = "block";
     }
-	
-	
-	
+		
+const aboutBtn = document.getElementById("aboutBtn");
+aboutBtn.style.opacity = "1";
+aboutBtn.style.pointerEvents = "auto";
 
 
       document.getElementById('fullscreenBtn')
@@ -921,6 +760,27 @@ for (let i = 1; i <= 14; i++) {
           : 'M15 6l-6 6 6 6'  // ▶
         );
       };
+	  
+	  const exitFullscreenBtn = document.getElementById("exitFullscreenBtn");
+
+document.addEventListener("fullscreenchange", () => {
+  if (document.fullscreenElement) {
+    exitFullscreenBtn.style.display = "block";
+  } else {
+    exitFullscreenBtn.style.display = "none";
+  }
+});
+
+exitFullscreenBtn.addEventListener("click", () => {
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.webkitExitFullscreen) {
+    document.webkitExitFullscreen(); // Safari
+  } else if (document.msExitFullscreen) {
+    document.msExitFullscreen(); // IE11
+  }
+});
+
 
 function buildCarousel(items) {
   const thumbnailsContainer = document.getElementById("carouselThumbnails");
@@ -957,10 +817,6 @@ function buildCarousel(items) {
     thumbnailsContainer.appendChild(thumb);
   });
 }
-
-
-
-
     function showMedia(index) {
       if (carouselItems.length === 0) return;
       currentMediaIndex = (index + carouselItems.length) % carouselItems.length;
@@ -969,17 +825,31 @@ function buildCarousel(items) {
       const mainVideo = document.getElementById("mainVideo");
       const captionEl = document.getElementById("mediaCaption");
       
-      mainVideo.src = "";
-      mainImage.style.display = "none";
-      mainVideo.style.display = "none";
-      
-      if (item.type === "image") {
-        mainImage.src = item.url;
-        mainImage.style.display = "block";
-      } else if (item.type === "video") {
-        mainVideo.src = "https://www.youtube-nocookie.com/embed/" + item.youtubeId;
-        mainVideo.style.display = "block";
-      }
+const fullscreenBtn = document.getElementById("fullscreenBtn");
+
+mainVideo.src = "";
+mainImage.style.display = "none";
+mainVideo.style.display = "none";
+fullscreenBtn.style.display = "none";
+
+if (item.type === "image") {
+  mainImage.src = item.url;
+  mainImage.style.display = "block";
+  fullscreenBtn.style.display = "block";
+  fullscreenBtn.onclick = () => {
+    if (mainImage.requestFullscreen) {
+      mainImage.requestFullscreen();
+    } else if (mainImage.webkitRequestFullscreen) {
+      mainImage.webkitRequestFullscreen(); // Safari
+    } else if (mainImage.msRequestFullscreen) {
+      mainImage.msRequestFullscreen(); // IE11
+    }
+  };
+} else if (item.type === "video") {
+  mainVideo.src = "https://www.youtube-nocookie.com/embed/" + item.youtubeId;
+  mainVideo.style.display = "block";
+}
+
       captionEl.textContent = item.desc || "";
       document.getElementById("carouselCounter").textContent = (currentMediaIndex + 1) + " of " + carouselItems.length;
 
@@ -1010,22 +880,21 @@ function buildCarousel(items) {
     
     function closeSidebar() {
       document.getElementById("sidebar").classList.remove("visible");
-    }
-    
-	function showIntro() {
+    }   
+function showIntro() {
   const intro = document.getElementById("sidebar-intro");
+  const aboutBtn = document.getElementById("aboutBtn");
+
   intro.style.display = "block";
   intro.style.position = "static";
-  intro.style.top = "";
-  intro.style.left = "";
   intro.style.visibility = "visible";
-  
+
   document.getElementById("sidebar-content").style.display = "none";
-  document.getElementById("aboutBtn").style.display = "none";
 
+  // Don't hide About button completely
+  aboutBtn.style.opacity = "0.5";
+  aboutBtn.style.pointerEvents = "none";
 }
-
-    
     function emphasizeKeywords(text) {
       return text.replace(/\b(PHA|HAC|EPA|Jane Golden|Mural Arts)\b/g, '<strong>$1</strong>');
     }
@@ -1036,10 +905,7 @@ function buildCarousel(items) {
         else if (e.key === "ArrowLeft") prevMedia();
         else if (e.key === "Escape") toggleSidebar();
       }
-    });
-	
-	
-	
+    });	
 window.nextMedia  = nextMedia;
 window.prevMedia  = prevMedia;
 window.nextPoint  = nextPoint;
@@ -1051,7 +917,13 @@ window.showIntro  = showIntro;
 document.getElementById("sidebar").classList.add("visible");
 document.getElementById("togglePath").setAttribute("d", "M9 6l6 6-6 6");
 
-
+// Restore About button if it's accidentally hidden
+window.addEventListener('load', () => {
+  const btn = document.getElementById('aboutBtn');
+  btn.style.display = 'block';
+  btn.style.opacity = '1';
+  btn.style.pointerEvents = 'auto';
+});
   </script>
 </body>
 </html>
