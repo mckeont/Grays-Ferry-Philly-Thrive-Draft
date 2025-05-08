@@ -226,26 +226,58 @@ h1, h2, h3, .point-header h2, .time-filter button {
 
 @media (max-width: 600px) {
   #sidebar {
+    position: fixed;
     width: 100%;
     max-width: none;
-    padding: 12px;
+    height: 70vh;
+    bottom: 0;
+    top: auto;
+    left: 0;
+    transform: translateY(100%);
+	 z-index: 10000 !important;
+    transition: transform 0.3s ease;
+	  box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
   }
-  .carousel-thumbnails img {
-    width: 48px;
-    height: 48px;
+
+  #sidebar.visible {
+    transform: translateY(0);
   }
-  .nav-button {
-    padding: 4px 8px;
-    font-size: 16px;
+
+  #map {
+    height: 100vh;
   }
-  .btn-story {
-    font-size: 0.95em;
-    padding: 10px;
-  }
-  #sidebar h2 {
-    font-size: 1.1em;
+
+  #aboutBtn {
+    bottom: 80px;
   }
 }
+
+@media (max-width: 600px) {
+  #sidebar-tab {
+    bottom: 8px;
+    top: auto;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+}
+
+
+
+@media (max-width: 600px) {
+  .scrollable-content {
+    padding: 8px;
+  }
+  .btn-story {
+    padding: 8px;
+    font-size: 0.9em;
+  }
+  #sidebar-text p {
+    text-indent: 0;
+    font-weight: normal;
+  }
+}
+
 
 
 #fullscreenBtn {
@@ -304,6 +336,8 @@ h1, h2, h3, .point-header h2, .time-filter button {
       	<button id="aboutBtn" onclick="showIntro()"> About</button>
 
   <div id="sidebar">
+  <div style="width: 40px; height: 4px; background: #ccc; border-radius: 2px; margin: 8px auto;"></div>
+
     <div class="scrollable-content">
 
       <div id="sidebar-intro">
@@ -708,6 +742,7 @@ intro.style.left = "-9999px";
 intro.style.visibility = "hidden";
 
       document.getElementById("sidebar-content").style.display = "block";
+	  document.querySelector('.scrollable-content').scrollTop = 0;
       document.getElementById("sidebar").classList.add("visible");
 	  document.getElementById("aboutBtn").style.display = "inline-block";
 
@@ -777,10 +812,25 @@ for (let i = 1; i <= 14; i++) {
       buildCarousel(carouselItems);
       updatePointCounter();
 const latlng = L.latLng(parseFloat(location.X), parseFloat(location.Y));
-const offset = map.getSize().x * (window.innerWidth <= 600 ? -0.4 : -0.3);
-const targetPoint = map.latLngToContainerPoint(latlng).subtract([offset, 0]);
+let targetPoint;
+
+const mapSize = map.getSize();
+const isMobile = window.matchMedia("(max-width: 600px)").matches;
+
+if (isMobile) {
+  const offsetY = mapSize.y * 0.25;
+  targetPoint = map.latLngToContainerPoint(latlng).add([0, offsetY]);
+}
+ else {
+  // Desktop: sidebar is right panel, so pan horizontally left a bit
+  const offsetX = mapSize.x * 0.25;
+  targetPoint = map.latLngToContainerPoint(latlng).add([offsetX, 0]);
+}
+
 const newLatLng = map.containerPointToLatLng(targetPoint);
-map.panTo(newLatLng);
+map.panTo(newLatLng, { animate: true, duration: 0.6 });
+
+
       if (activePopup) {
         map.removeLayer(activePopup);
       }
@@ -798,8 +848,34 @@ map.panTo(newLatLng);
 	  document.getElementById("aboutBtn").style.display = "block";
     }
 	
-	
-	
+	if (window.innerWidth <= 600) {
+  map.on("click", () => {
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar.classList.contains("visible")) {
+      sidebar.classList.remove("visible");
+      lockBodyScroll(false);
+    }
+  });
+}
+
+	if (window.innerWidth <= 600) {
+  const sidebar = document.getElementById("sidebar");
+  let startY = 0;
+
+  sidebar.addEventListener("touchstart", e => {
+    startY = e.touches[0].clientY;
+  });
+
+  sidebar.addEventListener("touchend", e => {
+    const endY = e.changedTouches[0].clientY;
+    if (endY - startY > 100) {  // Swipe down threshold
+      sidebar.classList.remove("visible");
+      lockBodyScroll(false);
+    }
+  });
+}
+
+
 const aboutBtn = document.getElementById("aboutBtn");
 aboutBtn.style.opacity = "1";
 aboutBtn.style.pointerEvents = "auto";
@@ -817,6 +893,9 @@ aboutBtn.style.pointerEvents = "auto";
         const sidebar = document.getElementById('sidebar');
         const path    = document.getElementById('togglePath');
         const open    = sidebar.classList.toggle('visible');
+		
+		 lockBodyScroll(open);
+		 
         path.setAttribute('d', open
           ? 'M9 6l6 6-6 6'   // ◀
           : 'M15 6l-6 6 6 6'  // ▶
@@ -842,6 +921,13 @@ exitFullscreenBtn.addEventListener("click", () => {
     document.msExitFullscreen(); // IE11
   }
 });
+
+function lockBodyScroll(lock) {
+  document.body.style.overflow = lock ? 'hidden' : 'auto';
+}
+
+document.getElementById("sidebar").classList.add("visible");
+lockBodyScroll(true);
 
 
 function buildCarousel(items) {
@@ -977,7 +1063,9 @@ function showIntro() {
         else if (e.key === "Escape") toggleSidebar();
       }
     });
-		
+	
+	
+	
 window.nextMedia  = nextMedia;
 window.prevMedia  = prevMedia;
 window.nextPoint  = nextPoint;
@@ -989,6 +1077,8 @@ window.showIntro  = showIntro;
 document.getElementById("sidebar").classList.add("visible");
 document.getElementById("togglePath").setAttribute("d", "M9 6l6 6-6 6");
 
+
+
 // Restore About button if it's accidentally hidden
 window.addEventListener('load', () => {
   const btn = document.getElementById('aboutBtn');
@@ -996,6 +1086,12 @@ window.addEventListener('load', () => {
   btn.style.opacity = '1';
   btn.style.pointerEvents = 'auto';
 });
+
+window.addEventListener('resize', () => {
+  const sidebar = document.getElementById('sidebar');
+  lockBodyScroll(sidebar.classList.contains('visible'));
+});
+
 
   </script>
 </body>
