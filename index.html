@@ -28,11 +28,13 @@ h1, h2, h3, .point-header h2, .time-filter button {
 #aboutBtn {
   position: fixed; bottom: 10px; left: 8px; z-index: 410;
   background: #fce4ec; color: #6a1b9a; border: 1px solid #f8bbd0;
-  border-radius: 6px; padding: 4px 10px; font-weight: 500;
-  cursor: pointer; width: 210px;
+  border-radius: 20px; padding: 6px 14px; font-weight: 500;
+  cursor: pointer; width: auto;
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
   transition: opacity 0.3s ease; display: block;
+  font-size: 0.9em;
 }
+
 
 #sidebar {
   position: absolute; top: 0; right: 0; width: 100%; max-width: 350px;
@@ -247,10 +249,26 @@ h1, h2, h3, .point-header h2, .time-filter button {
     height: 100vh;
   }
 
+.leaflet-control-layers {
+  margin-top: 50px;
+}
+
+
+@media (max-width: 600px) {
   #aboutBtn {
-    bottom: 80px;
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    top: auto;
+    z-index: 1001;
+    padding: 6px 16px;
+    font-size: 0.9em;
+    border-radius: 20px;
+    width: auto;
   }
 }
+
 
 @media (max-width: 600px) {
   #sidebar-tab {
@@ -261,7 +279,6 @@ h1, h2, h3, .point-header h2, .time-filter button {
     transform: translateX(-50%);
   }
 }
-
 
 
 @media (max-width: 600px) {
@@ -277,8 +294,6 @@ h1, h2, h3, .point-header h2, .time-filter button {
     font-weight: normal;
   }
 }
-
-
 
 #fullscreenBtn {
   position: absolute;
@@ -375,12 +390,7 @@ h1, h2, h3, .point-header h2, .time-filter button {
 		  <button id="exitFullscreenBtn">×</button>
 		  <button id="fullscreenBtn" title="View Fullscreen">[ ]</button>
 <div id="mainVideoWrapper" class="video-wrapper" style="display:none;">
-  <iframe id="mainVideo" frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-  </iframe>
 </div>
-
-
 
           <div id="mediaCaption" style="margin-top:4px; font-size:0.9em; color:#555;"></div>
           <div class="carousel-counter" id="carouselCounter">0 of 0</div>
@@ -398,36 +408,23 @@ h1, h2, h3, .point-header h2, .time-filter button {
           Your browser does not support the audio element.
         </audio>
         <div id="sidebar-contributor"></div>
-		
-
+	
 <button class="btn-story" onclick="window.open('https://graysferryarchive.com/addyourstory/','_blank')">
   Know more about this point? Click here to add your story
 </button>
-
       </div>
-
     </div><!-- /.scrollable-content -->
-
   </div>
-
-
-
-  <div id="sidebar-tab">
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-         fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"
-         onclick="toggleSidebar()">
-      <path id="togglePath" d="M15 6l-6 6 6 6"/>
-    </svg>
-  </div>
-  
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     <script src="https://rawcdn.githack.com/makinacorpus/Leaflet.TextPath/master/leaflet.textpath.js"></script>
 <script src="streets-data.js"></script>
 
   <script>
-  document.addEventListener('DOMContentLoaded', () => {
-  
+document.addEventListener('DOMContentLoaded', () => {
+  const aboutBtn = document.getElementById("aboutBtn");
+  const isMobile = window.matchMedia("(max-width: 600px)").matches;  // <--- Add here
+
     let allLocations = [];
     let currentIndex = 0;
     let markersArray = [];
@@ -596,13 +593,8 @@ const categoryOrder = [
 	let currentPeriod     = 'all';
 	let visibleCategories = new Set(categoryOrder);
 
-
-
-
 document.getElementById('carouselPrev').addEventListener('click', prevMedia);
 document.getElementById('carouselNext').addEventListener('click', nextMedia);
-
-
 
 let usedCategories = new Set();
 const legend = L.control({ position: 'bottomleft' });
@@ -660,8 +652,6 @@ legend.onAdd = function(map) {
 
 legend.addTo(map);
 
-
-
 function refreshMarkers() {
   markersArray.forEach(marker => {
     const cat    = marker.options.category;
@@ -674,10 +664,7 @@ function refreshMarkers() {
   });
 }
 
-
-
     const categoryIcons = {};
-	
 
     const apiUrl = "https://script.google.com/macros/s/AKfycbzyrIcLZaFyYhwUGviH9bYw5GOzKGooPomy2arJmi2D4V-G8-QF-yME-gqcnaSHUeDYVA/exec";
 
@@ -710,16 +697,16 @@ fetch(apiUrl)
             html: `<div style="background:${categoryColors[category]}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #333;"></div>`
           });
       const marker = L.marker([parseFloat(location.X), parseFloat(location.Y)], { icon: customIcon });
-marker.bindTooltip(location.Name || "Untitled", {
-  direction: 'top',
-  offset: [0, -10],
-  permanent: false,
-  className: 'marker-tooltip',
-  sticky: true,
-  pane: 'markerPane' 
-});
-
-
+if (!isMobile) {
+  marker.bindTooltip(location.Name || "Untitled", {
+    direction: 'top',
+    offset: [0, -10],
+    permanent: false,
+    className: 'marker-tooltip',
+    sticky: true,
+    pane: 'markerPane'
+  });
+}
 	  marker.options.category = category;
 	  marker.options.status   = (location.Status || 'Present').toLowerCase();  // “past” or “present”
       marker.on('click', () => {
@@ -745,15 +732,16 @@ intro.style.visibility = "hidden";
 	  document.querySelector('.scrollable-content').scrollTop = 0;
       document.getElementById("sidebar").classList.add("visible");
 	  document.getElementById("aboutBtn").style.display = "inline-block";
+	  aboutBtn.style.opacity = "1";
+	  aboutBtn.style.pointerEvents = "auto";
+	  
+	  
+	  function enableAboutBtn() {
+  const btn = document.getElementById("aboutBtn");
+  btn.style.opacity = "1";
+  btn.style.pointerEvents = "auto";
+}
 
-      const tab = document.getElementById("sidebar-tab");
-      tab.innerHTML = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-       fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"
-       onclick="toggleSidebar()">
-    <path id="togglePath" d="M9 6l6 6-6 6"/>
-  </svg>
-`;
 
       document.getElementById("sidebar-title").textContent = location?.Name || "Untitled";
 document.getElementById("sidebar-address").innerHTML = location.Address
@@ -809,6 +797,9 @@ for (let i = 1; i <= 14; i++) {
     });
   }
 }
+
+document.getElementById("mainVideoWrapper").style.display = "none";
+
       buildCarousel(carouselItems);
       updatePointCounter();
 const latlng = L.latLng(parseFloat(location.X), parseFloat(location.Y));
@@ -830,24 +821,27 @@ if (isMobile) {
 const newLatLng = map.containerPointToLatLng(targetPoint);
 map.panTo(newLatLng, { animate: true, duration: 0.6 });
 
-
       if (activePopup) {
         map.removeLayer(activePopup);
       }
-      activePopup = L.popup({
-        closeButton: false,
-        offset: L.point(0, -30),
-        autoPan: false,
-        className: 'active-label'
-      })
-        .setLatLng([parseFloat(location.X), parseFloat(location.Y)])
-        .setContent(`<strong>${location.Name}</strong>`)
-        .openOn(map);
-  
+if (!isMobile) {
+  activePopup = L.popup({
+    closeButton: false,
+    offset: L.point(0, -30),
+    autoPan: false,
+    className: 'active-label'
+  })
+  .setLatLng([parseFloat(location.X), parseFloat(location.Y)])
+  .setContent(`<strong>${location.Name}</strong>`)
+  .openOn(map);
+}
       console.log("Sidebar updated for:", location);
 	  document.getElementById("aboutBtn").style.display = "block";
     }
 	
+	aboutBtn.style.opacity = "1";
+aboutBtn.style.pointerEvents = "auto";
+
 	if (window.innerWidth <= 600) {
   map.on("click", () => {
     const sidebar = document.getElementById("sidebar");
@@ -875,12 +869,6 @@ map.panTo(newLatLng, { animate: true, duration: 0.6 });
   });
 }
 
-
-const aboutBtn = document.getElementById("aboutBtn");
-aboutBtn.style.opacity = "1";
-aboutBtn.style.pointerEvents = "auto";
-
-
       document.getElementById('fullscreenBtn')
               .addEventListener('click', () => {
         const img = document.getElementById('mainImage');
@@ -888,19 +876,6 @@ aboutBtn.style.pointerEvents = "auto";
           img.requestFullscreen();
         }
       });
-	  
-	        window.toggleSidebar = () => {
-        const sidebar = document.getElementById('sidebar');
-        const path    = document.getElementById('togglePath');
-        const open    = sidebar.classList.toggle('visible');
-		
-		 lockBodyScroll(open);
-		 
-        path.setAttribute('d', open
-          ? 'M9 6l6 6-6 6'   // ◀
-          : 'M15 6l-6 6 6 6'  // ▶
-        );
-      };
 	  
 	  const exitFullscreenBtn = document.getElementById("exitFullscreenBtn");
 
@@ -938,8 +913,6 @@ function buildCarousel(items) {
   if (items.length === 0) {
     document.getElementById("mainImage").src = "";
     document.getElementById("mainImage").style.display = "none";
-    document.getElementById("mainVideo").src = "";
-    document.getElementById("mainVideo").style.display = "none";
     document.getElementById("mediaCaption").textContent = "";
     document.getElementById("carouselCounter").textContent = " ";
 
@@ -966,55 +939,49 @@ function buildCarousel(items) {
   });
 }
 
-
-
-
-    function showMedia(index) {
-document.getElementById("mainVideo").src = "about:blank";
-
-      if (carouselItems.length === 0) return;
-      currentMediaIndex = (index + carouselItems.length) % carouselItems.length;
-      const item = carouselItems[currentMediaIndex];
-      const mainImage = document.getElementById("mainImage");
-      const mainVideo = document.getElementById("mainVideo");
-      const captionEl = document.getElementById("mediaCaption");
-      
-const fullscreenBtn = document.getElementById("fullscreenBtn");
-
-mainVideo.src = "";
-mainImage.style.display = "none";
-document.getElementById("mainVideoWrapper").style.display = "none";
-fullscreenBtn.style.display = "none";
-
-if (item.type === "image") {
-  mainImage.src = item.url;
-  mainImage.style.display = "block";
-  fullscreenBtn.style.display = "block";
-  fullscreenBtn.onclick = () => {
-    if (mainImage.requestFullscreen) {
-      mainImage.requestFullscreen();
-    } else if (mainImage.webkitRequestFullscreen) {
-      mainImage.webkitRequestFullscreen(); // Safari
-    } else if (mainImage.msRequestFullscreen) {
-      mainImage.msRequestFullscreen(); // IE11
-    }
-  };
-} else if (item.type === "video") {
+  function showMedia(index) {
+  if (carouselItems.length === 0) return;
+  currentMediaIndex = (index + carouselItems.length) % carouselItems.length;
+  const item = carouselItems[currentMediaIndex];
+  const mainImage = document.getElementById("mainImage");
+  const captionEl = document.getElementById("mediaCaption");
+  const fullscreenBtn = document.getElementById("fullscreenBtn");
   const ytWrapper = document.getElementById("mainVideoWrapper");
-  const ytIframe = document.getElementById("mainVideo");
 
-  ytWrapper.style.display = "block";
-  ytIframe.src = `https://www.youtube-nocookie.com/embed/${item.youtubeId}?rel=0&modestbranding=1`;
+  // Reset media
+  mainImage.style.display = "none";
+  ytWrapper.innerHTML = "";
+  ytWrapper.style.display = "none";
+  fullscreenBtn.style.display = "none";
+
+  if (item.type === "image") {
+    mainImage.src = item.url;
+    mainImage.style.display = "block";
+    fullscreenBtn.style.display = "block";
+    fullscreenBtn.onclick = () => {
+      if (mainImage.requestFullscreen) mainImage.requestFullscreen();
+    };
+  } else if (item.type === "video") {
+    const newIframe = document.createElement("iframe");
+    newIframe.id = "ytVideo_" + item.youtubeId;
+    newIframe.frameBorder = "0";
+    newIframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    newIframe.allowFullscreen = true;
+    newIframe.src = `https://www.youtube-nocookie.com/embed/${item.youtubeId}?rel=0&modestbranding=1`;
+    ytWrapper.appendChild(newIframe);
+    ytWrapper.style.display = "block";  
+  }
+
+  captionEl.textContent = item.desc || "";
+  document.getElementById("carouselCounter").textContent =
+    (currentMediaIndex + 1) + " of " + carouselItems.length;
+
+  const thumbs = document.getElementById("carouselThumbnails").querySelectorAll("img");
+  thumbs.forEach((thumb, idx) => {
+    thumb.classList.toggle("active-thumb", idx === currentMediaIndex);
+  });
 }
 
-      captionEl.textContent = item.desc || "";
-      document.getElementById("carouselCounter").textContent = (currentMediaIndex + 1) + " of " + carouselItems.length;
-
-      const thumbs = document.getElementById("carouselThumbnails").querySelectorAll("img");
-      thumbs.forEach((thumb, idx) => {
-        thumb.classList.toggle("active-thumb", idx === currentMediaIndex);
-      });
-    }
     
     function nextMedia() {
       showMedia(currentMediaIndex + 1);
@@ -1039,32 +1006,37 @@ if (item.type === "image") {
       document.getElementById("sidebar").classList.remove("visible");
     }
 	
-	
-    
 function showIntro() {
-  const intro = document.getElementById("sidebar-intro");
-  const aboutBtn = document.getElementById("aboutBtn");
+  const intro     = document.getElementById("sidebar-intro");
+  const content   = document.getElementById("sidebar-content");
+  const sidebar   = document.getElementById("sidebar");
+  const aboutBtn  = document.getElementById("aboutBtn");
+
+  if (!sidebar.classList.contains("visible")) {
+    sidebar.classList.add("visible");
+    lockBodyScroll(true);
+  }
 
   intro.style.display = "block";
   intro.style.position = "static";
   intro.style.visibility = "visible";
 
-  document.getElementById("sidebar-content").style.display = "none";
+  content.style.display = "none";
 
-  // Don't hide About button completely
-  aboutBtn.style.opacity = "0.5";
-  aboutBtn.style.pointerEvents = "none";
+  aboutBtn.style.opacity = "1";
+  aboutBtn.style.pointerEvents = "auto";
 }
-    
-    document.addEventListener('keydown', function(e) {
-      if (document.getElementById("sidebar").classList.contains("visible")) {
-        if (e.key === "ArrowRight") nextMedia();
-        else if (e.key === "ArrowLeft") prevMedia();
-        else if (e.key === "Escape") toggleSidebar();
-      }
-    });
-	
-	
+
+document.addEventListener('keydown', function(e) {
+  if (document.getElementById("sidebar").classList.contains("visible")) {
+    if (e.key === "ArrowRight") nextMedia();
+    else if (e.key === "ArrowLeft") prevMedia();
+    else if (e.key === "Escape") {
+      document.getElementById("sidebar").classList.remove("visible");
+      lockBodyScroll(false);
+    }
+  }
+});
 	
 window.nextMedia  = nextMedia;
 window.prevMedia  = prevMedia;
@@ -1072,27 +1044,19 @@ window.nextPoint  = nextPoint;
 window.prevPoint  = prevPoint;
 window.showIntro  = showIntro;
 
+window.addEventListener('resize', () => {
+  const sidebar = document.getElementById('sidebar');
+  lockBodyScroll(sidebar.classList.contains('visible'));
 });
 
 document.getElementById("sidebar").classList.add("visible");
-document.getElementById("togglePath").setAttribute("d", "M9 6l6 6-6 6");
-
-
-
-// Restore About button if it's accidentally hidden
 window.addEventListener('load', () => {
   const btn = document.getElementById('aboutBtn');
   btn.style.display = 'block';
   btn.style.opacity = '1';
   btn.style.pointerEvents = 'auto';
 });
-
-window.addEventListener('resize', () => {
-  const sidebar = document.getElementById('sidebar');
-  lockBodyScroll(sidebar.classList.contains('visible'));
 });
-
-
   </script>
 </body>
 </html>
