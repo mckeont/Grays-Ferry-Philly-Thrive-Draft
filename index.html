@@ -62,7 +62,7 @@ h1, h2, h3, .point-header h2, .time-filter button {
   position: fixed;
   top: 150px;
   left: 10px;
-  z-index: 410;
+  z-index: 1001;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -272,6 +272,21 @@ h1, h2, h3, .point-header h2, .time-filter button {
 #fullscreenBtn:hover {
   background: rgba(0,0,0,0.7);
 }
+
+#fullscreenBtn {
+  top: 6px;
+  right: 6px;
+  background: rgba(255, 255, 255, 0.7);
+  color: #333;
+  font-size: 0.9em;
+  border: 1px solid #ccc;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+#fullscreenBtn:hover {
+  opacity: 1;
+}
+
 
 #exitFullscreenBtn {
   top: 8px;
@@ -743,6 +758,8 @@ map.on('zoomend', () => {
 
 
 map.getPane('markerPane').style.zIndex = 700;
+map.getPane('tooltipPane').style.zIndex = 750;
+
 const categoryColors = {
   "Parks and Green Spaces": "limegreen",
   "Housing": "orange",
@@ -873,10 +890,10 @@ if (!isMobile) {
     offset: [0, -10],
     permanent: false,
     className: 'marker-tooltip',
-    sticky: true,
-    pane: 'markerPane'
+    sticky: true
   });
 }
+
 	  marker.options.category = category;
 	  marker.options.status   = (location.Status || 'Present').toLowerCase();  // “past” or “present”
       marker.on('click', () => {
@@ -995,18 +1012,32 @@ map.panTo(newLatLng, { animate: true, duration: 0.6 });
       if (activePopup) {
         map.removeLayer(activePopup);
       }
-if (!isMobile) {
-  activePopup = L.popup({
-    closeButton: false,
-    offset: L.point(0, -30),
-    autoPan: false,
-    className: 'active-label'
-  })
-  .setLatLng([parseFloat(location.X), parseFloat(location.Y)])
-  .setContent(`<strong>${location.Name}</strong>`)
-  .openOn(map);
+if (activePopup) {
+  map.removeLayer(activePopup);
 }
-      console.log("Sidebar updated for:", location);
+
+activePopup = L.tooltip({
+  permanent: false,
+  direction: isMobile ? 'bottom' : 'top',
+  offset: isMobile ? L.point(0, 10) : L.point(0, -30),
+  className: 'active-label',
+  interactive: false
+})
+.setLatLng([parseFloat(location.X), parseFloat(location.Y)])
+.setContent(`<strong>${location.Name}</strong>`)
+.addTo(map);
+
+// Auto-hide the label on mobile after 2.5s
+if (isMobile) {
+  setTimeout(() => {
+    if (activePopup && map.hasLayer(activePopup)) {
+      map.removeLayer(activePopup);
+    }
+  }, 2500);
+}
+
+
+  console.log("Sidebar updated for:", location);
 	  document.getElementById("aboutBtn").style.display = "block";
     }
 	
@@ -1110,7 +1141,7 @@ function buildCarousel(items) {
   });
 }
 
-  function showMedia(index) {
+function showMedia(index) {
   if (carouselItems.length === 0) return;
   currentMediaIndex = (index + carouselItems.length) % carouselItems.length;
   const item = carouselItems[currentMediaIndex];
@@ -1119,41 +1150,53 @@ function buildCarousel(items) {
   const fullscreenBtn = document.getElementById("fullscreenBtn");
   const ytWrapper = document.getElementById("mainVideoWrapper");
 
-  // Reset media
+  // Reset everything
   mainImage.style.display = "none";
   ytWrapper.innerHTML = "";
   ytWrapper.style.display = "none";
   fullscreenBtn.style.display = "none";
 
   if (item.type === "image") {
+    // IMAGE case: show the img and fullscreen button
     mainImage.src = item.url;
     mainImage.style.display = "block";
-    fullscreenBtn.style.display = "block";
+
+    fullscreenBtn.style.display = "inline-block";
+    fullscreenBtn.style.opacity = "0.7";
     fullscreenBtn.onclick = () => {
       if (mainImage.requestFullscreen) mainImage.requestFullscreen();
     };
+
   } else if (item.type === "video") {
-    const newIframe = document.createElement("iframe");
-    newIframe.id = "ytVideo_" + item.youtubeId;
-    newIframe.frameBorder = "0";
-    newIframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-    newIframe.allowFullscreen = true;
-    newIframe.src = `https://www.youtube-nocookie.com/embed/${item.youtubeId}?rel=0&modestbranding=1`;
-    ytWrapper.appendChild(newIframe);
-    ytWrapper.style.display = "block";  
+    // VIDEO case: embed YouTube iframe, hide fullscreen button
+    const iframe = document.createElement("iframe");
+    iframe.id = "ytVideo_" + item.youtubeId;
+    iframe.frameBorder = "0";
+    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    iframe.allowFullscreen = true;
+    iframe.src = `https://www.youtube-nocookie.com/embed/${item.youtubeId}?rel=0&modestbranding=1`;
+    ytWrapper.appendChild(iframe);
+    ytWrapper.style.display = "block";
+
+    fullscreenBtn.style.display = "none";
+
+  } else {
+    // FALLBACK for any other media types: just hide fullscreen
+    fullscreenBtn.style.display = "none";
   }
 
+  // Caption and counter
   captionEl.textContent = item.desc || "";
   document.getElementById("carouselCounter").textContent =
     (currentMediaIndex + 1) + " of " + carouselItems.length;
 
+  // Highlight active thumbnail
   const thumbs = document.getElementById("carouselThumbnails").querySelectorAll("img");
   thumbs.forEach((thumb, idx) => {
     thumb.classList.toggle("active-thumb", idx === currentMediaIndex);
   });
 }
-
-    
+  
     function nextMedia() {
       showMedia(currentMediaIndex + 1);
     }
