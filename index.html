@@ -430,16 +430,16 @@ h1, h2, h3, .point-header h2, .time-filter button {
 }
 
 @media (max-width: 600px) {
-  #mapButtons {
-    bottom: 10px;
-    top: auto;
-    right: 50%;
-    transform: translateX(50%);
-    left: auto;
-    flex-direction: row;
-    justify-content: center;
-    z-index: 1001;
-  }
+#mapButtons {
+  top: 28px;
+  bottom: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  right: auto;
+  flex-direction: row;
+  justify-content: center;
+  z-index: 1001;
+}
 
   #legendToggleBtn,
   #aboutBtn {
@@ -722,15 +722,14 @@ const legendToggleBtn = document.getElementById("legendToggleBtn");
 legendToggleBtn.addEventListener("click", () => {
   if (legendVisible) {
     map.removeControl(legendControl);
-if (legendToggleBtn) {
-  legendToggleBtn.innerHTML = legendVisible ? "📑 Hide Legend" : "📑 Show Legend";
-}
+    legendToggleBtn.innerHTML = "📑 Show Legend";
   } else {
     legendControl.addTo(map);
     legendToggleBtn.innerHTML = "📑 Hide Legend";
   }
   legendVisible = !legendVisible;
 });
+
 
 map.on('zoomend', () => {
   const zoom = map.getZoom();
