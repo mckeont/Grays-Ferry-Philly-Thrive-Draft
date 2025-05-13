@@ -517,10 +517,13 @@ h1, h2, h3, .point-header h2, .time-filter button {
 <body>
   <div id="map"></div>
 <div id="mapButtons">
-<button id="aboutBtn" class="map-button" onclick="showIntro()" title="View project overview">About</button>
-<button id="legendToggleBtn" class="map-button" title="Toggle legend categories">📑 Hide Legend</button>
-
+  <button id="aboutBtn" class="map-button" onclick="showIntro()" title="View project overview">About</button>
+  <button id="legendToggleBtn" class="map-button" title="Toggle legend categories">📑 Hide Legend</button>
+  <button id="openSidebarBtn" class="map-button" title="Reopen last viewed point" style="display:none;">
+    Open Sidebar
+  </button>
 </div>
+
 
   <div id="sidebar">
   <div style="width: 40px; height: 4px; background: #ccc; border-radius: 2px; margin: 8px auto;"></div>
@@ -607,7 +610,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const aboutBtn = document.getElementById("aboutBtn");
   const isMobile = window.matchMedia("(max-width: 600px)").matches;  
  
-	
+	const openSidebarBtn = document.getElementById("openSidebarBtn");
+
+openSidebarBtn.addEventListener("click", () => {
+  if (allLocations[currentIndex]) {
+    updateSidebar(allLocations[currentIndex], currentIndex);
+    openSidebarBtn.style.display = "none";
+  }
+});
+
     function convertGoogleDriveImageLink(url) {
       let match = url.match(/(?:\/d\/|id=)([a-zA-Z0-9-_]+)/);
       if (match) {
@@ -688,7 +699,7 @@ const filteredStreets = {
 const streetLines = L.geoJSON(filteredStreets, {
   pane: 'labelsPane',
   style: { color: '#eee', weight: 0.3 }
-}).addTo(map);;
+}).addTo(map);
 
 // 4) draw the labels with **numeric** orientation
 function labelStreet(feature, layer) {
@@ -723,7 +734,7 @@ const streetLabels = L.geoJSON(filteredStreets, {
 
 
 // 5) group them and *then* add to your layer‐control
-const streetsGroup = L.layerGroup([streetLines, streetLabels]).addTo(map);;
+const streetsGroup = L.layerGroup([streetLines, streetLabels]).addTo(map);
 
 const overlays = {
   'Streets':           streetsGroup
@@ -872,13 +883,14 @@ fetch(apiUrl)
       if (!categoryIcons[category] && location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")) {
         categoryIcons[category] = convertGoogleDriveImageLink(location["Marker Icon"]);
       }
-      const customIcon = (location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com"))
-        ? L.icon({
-            iconUrl: convertGoogleDriveImageLink(location["Marker Icon"]),
-            iconSize: [32, 32],
-            iconAnchor: [16, 32],
-            popupAnchor: [0, -32]
-          })
+const customIcon = (location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com"))
+  ? L.icon({
+      iconUrl: convertGoogleDriveImageLink(location["Marker Icon"]),
+      iconSize: [32, 32],
+      iconAnchor: [16, 50],     // ⬅️ moves the anchor higher
+      popupAnchor: [0, -20]     // ⬅️ lifts the popup relative to the anchor
+    })
+
         : L.divIcon({
             className: "default-circle",
             html: `<div style="background:${categoryColors[category]}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #333;"></div>`
@@ -887,7 +899,7 @@ fetch(apiUrl)
 if (!isMobile) {
   marker.bindTooltip(location.Name || "Untitled", {
     direction: 'top',
-    offset: [0, -10],
+    offset: [0, 300],
     permanent: false,
     className: 'marker-tooltip',
     sticky: true
@@ -896,9 +908,11 @@ if (!isMobile) {
 
 	  marker.options.category = category;
 	  marker.options.status   = (location.Status || 'Present').toLowerCase();  // “past” or “present”
-      marker.on('click', () => {
-        updateSidebar(location, allLocations.indexOf(location));
-      });
+marker.on('click', () => {
+  marker.unbindTooltip();  
+  updateSidebar(location, allLocations.indexOf(location));
+});
+
       markersArray.push(marker);
     });
     L.layerGroup(markersArray).addTo(map);
@@ -991,51 +1005,42 @@ document.getElementById("mainVideoWrapper").style.display = "none";
       buildCarousel(carouselItems);
       updatePointCounter();
 const latlng = L.latLng(parseFloat(location.X), parseFloat(location.Y));
-let targetPoint;
-
 const mapSize = map.getSize();
-const isMobile = window.matchMedia("(max-width: 600px)").matches;
+const isMobileView = window.innerWidth <= 600;
 
-if (isMobile) {
-  const offsetY = mapSize.y * 0.25;
-  targetPoint = map.latLngToContainerPoint(latlng).add([0, offsetY]);
+let offsetPoint;
+
+if (isMobileView) {
+  // Pan to top-center (higher on screen so it's not hidden)
+  offsetPoint = map.latLngToContainerPoint(latlng).add([0, mapSize.y * 0.35]);
+} else {
+  // Pan left so it's not hidden by sidebar
+  offsetPoint = map.latLngToContainerPoint(latlng).add([mapSize.x * 0.25, 0]);
 }
- else {
-  // Desktop: sidebar is right panel, so pan horizontally left a bit
-  const offsetX = mapSize.x * 0.25;
-  targetPoint = map.latLngToContainerPoint(latlng).add([offsetX, 0]);
-}
 
-const newLatLng = map.containerPointToLatLng(targetPoint);
-map.panTo(newLatLng, { animate: true, duration: 0.6 });
 
-      if (activePopup) {
-        map.removeLayer(activePopup);
-      }
+map.panTo(map.containerPointToLatLng(offsetPoint), {
+  animate: true,
+  duration: 0.6
+});
+
 if (activePopup) {
   map.removeLayer(activePopup);
+  activePopup = null;
 }
 
 activePopup = L.tooltip({
-  permanent: false,
-  direction: isMobile ? 'bottom' : 'top',
-  offset: isMobile ? L.point(0, 10) : L.point(0, -30),
-  className: 'active-label',
-  interactive: false
+  permanent: true,
+  direction: 'top',
+  offset: [0, 10],
+  className: 'marker-tooltip active-label'
 })
 .setLatLng([parseFloat(location.X), parseFloat(location.Y)])
 .setContent(`<strong>${location.Name}</strong>`)
 .addTo(map);
 
-// Auto-hide the label on mobile after 2.5s
-if (isMobile) {
-  setTimeout(() => {
-    if (activePopup && map.hasLayer(activePopup)) {
-      map.removeLayer(activePopup);
-    }
-  }, 2500);
-}
 
+openSidebarBtn.style.display = "none"; // 💥 HIDE reopen button
 
   console.log("Sidebar updated for:", location);
 	  document.getElementById("aboutBtn").style.display = "block";
@@ -1044,15 +1049,17 @@ if (isMobile) {
 	aboutBtn.style.opacity = "1";
 aboutBtn.style.pointerEvents = "auto";
 
-	if (window.innerWidth <= 600) {
+if (window.innerWidth <= 600) {
   map.on("click", () => {
     const sidebar = document.getElementById("sidebar");
     if (sidebar.classList.contains("visible")) {
       sidebar.classList.remove("visible");
       lockBodyScroll(false);
+      openSidebarBtn.style.display = "inline-block";
     }
   });
 }
+
 
 	if (window.innerWidth <= 600) {
   const sidebar = document.getElementById("sidebar");
@@ -1062,14 +1069,14 @@ aboutBtn.style.pointerEvents = "auto";
     startY = e.touches[0].clientY;
   });
 
-  sidebar.addEventListener("touchend", e => {
-    const endY = e.changedTouches[0].clientY;
-    if (endY - startY > 100) {  // Swipe down threshold
-      sidebar.classList.remove("visible");
-      lockBodyScroll(false);
-    }
-  });
-}
+sidebar.addEventListener("touchend", e => {
+  const endY = e.changedTouches[0].clientY;
+  if (endY - startY > 100) {  // Swipe down threshold
+    sidebar.classList.remove("visible");
+    lockBodyScroll(false);
+    openSidebarBtn.style.display = "inline-block";
+  }
+});
 
       document.getElementById('fullscreenBtn')
               .addEventListener('click', () => {
@@ -1105,7 +1112,7 @@ function lockBodyScroll(lock) {
 
 document.getElementById("sidebar").classList.add("visible");
 lockBodyScroll(true);
-
+}
 
 function buildCarousel(items) {
   const thumbnailsContainer = document.getElementById("carouselThumbnails");
@@ -1140,7 +1147,6 @@ function buildCarousel(items) {
     thumbnailsContainer.appendChild(thumb);
   });
 }
-
 function showMedia(index) {
   if (carouselItems.length === 0) return;
   currentMediaIndex = (index + carouselItems.length) % carouselItems.length;
@@ -1160,13 +1166,8 @@ function showMedia(index) {
     // IMAGE case: show the img and fullscreen button
     mainImage.src = item.url;
     mainImage.style.display = "block";
-
     fullscreenBtn.style.display = "inline-block";
     fullscreenBtn.style.opacity = "0.7";
-    fullscreenBtn.onclick = () => {
-      if (mainImage.requestFullscreen) mainImage.requestFullscreen();
-    };
-
   } else if (item.type === "video") {
     // VIDEO case: embed YouTube iframe, hide fullscreen button
     const iframe = document.createElement("iframe");
@@ -1177,26 +1178,21 @@ function showMedia(index) {
     iframe.src = `https://www.youtube-nocookie.com/embed/${item.youtubeId}?rel=0&modestbranding=1`;
     ytWrapper.appendChild(iframe);
     ytWrapper.style.display = "block";
-
     fullscreenBtn.style.display = "none";
-
   } else {
-    // FALLBACK for any other media types: just hide fullscreen
     fullscreenBtn.style.display = "none";
   }
 
-  // Caption and counter
   captionEl.textContent = item.desc || "";
   document.getElementById("carouselCounter").textContent =
     (currentMediaIndex + 1) + " of " + carouselItems.length;
 
-  // Highlight active thumbnail
   const thumbs = document.getElementById("carouselThumbnails").querySelectorAll("img");
   thumbs.forEach((thumb, idx) => {
     thumb.classList.toggle("active-thumb", idx === currentMediaIndex);
   });
 }
-  
+
     function nextMedia() {
       showMedia(currentMediaIndex + 1);
     }
@@ -1239,6 +1235,7 @@ function showIntro() {
 
   aboutBtn.style.opacity = "1";
   aboutBtn.style.pointerEvents = "auto";
+  openSidebarBtn.style.display = "none"; // 💥 HIDE reopen button
 }
 
 document.addEventListener('keydown', function(e) {
