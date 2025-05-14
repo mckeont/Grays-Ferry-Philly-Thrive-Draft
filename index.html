@@ -510,6 +510,12 @@ h1, h2, h3, .point-header h2, .time-filter button {
     transform: none;
   }
 }
+
+.leaflet-control-layers {
+  margin-top: 140px !important;
+  z-index: 500 !important;
+}
+
 </style>
 
 
@@ -665,6 +671,7 @@ openSidebarBtn.addEventListener("click", () => {
 
 const map = L.map('map', {
   layers: [cartoVoyagerNoLabels],
+  zoomControl: false,
   maxBounds: bounds,
   minZoom: 12,
   maxZoom: 20
@@ -740,7 +747,7 @@ const overlays = {
   'Streets':           streetsGroup
 };
 
-L.control.layers(basemaps, overlays, { position: 'topleft' }).addTo(map);
+L.control.layers(basemaps, overlays, { position: 'bottomleft' }).addTo(map);
 
 
 
@@ -899,7 +906,7 @@ const customIcon = (location["Marker Icon"] && location["Marker Icon"].includes(
 if (!isMobile) {
   marker.bindTooltip(location.Name || "Untitled", {
     direction: 'top',
-    offset: [0, 300],
+    offset: [0, -15],
     permanent: false,
     className: 'marker-tooltip',
     sticky: true
@@ -1032,7 +1039,7 @@ if (activePopup) {
 activePopup = L.tooltip({
   permanent: true,
   direction: 'top',
-  offset: [0, 10],
+  offset: [0, -40],
   className: 'marker-tooltip active-label'
 })
 .setLatLng([parseFloat(location.X), parseFloat(location.Y)])
