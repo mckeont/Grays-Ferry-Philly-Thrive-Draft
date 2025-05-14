@@ -103,6 +103,44 @@ h1, h2, h3, .point-header h2, .time-filter button {
   border: 1px solid transparent;
 }
 
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 10010;
+  padding-top: 40px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.85);
+  backdrop-filter: blur(2px);
+}
+
+.modal-content {
+  margin: auto;
+  display: block;
+  max-width: 90%;
+  max-height: 80vh;
+  border-radius: 4px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
+.modal .close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  color: #fff;
+  font-size: 32px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 10011;
+}
+.modal .close:hover {
+  color: #ccc;
+}
+
+
 #aboutBtn {
   background: #fce4ec;
   color: #6a1b9a;
@@ -601,6 +639,13 @@ h1, h2, h3, .point-header h2, .time-filter button {
   background: #e91e63;
 }
 
+#mainImage {
+  cursor: zoom-in;
+  transition: opacity 0.2s ease;
+}
+#mainImage:hover {
+  opacity: 0.9;
+}
 
 
 @media (max-width: 600px) {
@@ -660,7 +705,6 @@ h1, h2, h3, .point-header h2, .time-filter button {
 	   <div class="carousel-main" id="carouselMainContainer">
           <img id="mainImage" style="display: none;" alt="Main Media">
 		  <button id="exitFullscreenBtn">×</button>
-		  <button id="fullscreenBtn" title="View Fullscreen">[ ]</button>
 <div id="mainVideoWrapper" class="video-wrapper" style="display:none;">
 </div>
 
@@ -687,6 +731,14 @@ h1, h2, h3, .point-header h2, .time-filter button {
       </div>
     </div><!-- /.scrollable-content -->
   </div>
+  
+  
+  <!-- Modal Zoom Structure -->
+<div id="modalZoom" class="modal">
+  <span class="close">&times;</span>
+  <img class="modal-content" id="zoomedImg">
+</div>
+
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     <script src="https://rawcdn.githack.com/makinacorpus/Leaflet.TextPath/master/leaflet.textpath.js"></script>
@@ -1181,13 +1233,7 @@ sidebar.addEventListener("touchend", e => {
   }
 });
 
-      document.getElementById('fullscreenBtn')
-              .addEventListener('click', () => {
-        const img = document.getElementById('mainImage');
-        if (img.style.display === 'block' && img.requestFullscreen) {
-          img.requestFullscreen();
-        }
-      });
+
 	  
 	  const exitFullscreenBtn = document.getElementById("exitFullscreenBtn");
 
@@ -1250,29 +1296,24 @@ function buildCarousel(items) {
     thumbnailsContainer.appendChild(thumb);
   });
 }
+
 function showMedia(index) {
   if (carouselItems.length === 0) return;
   currentMediaIndex = (index + carouselItems.length) % carouselItems.length;
   const item = carouselItems[currentMediaIndex];
   const mainImage = document.getElementById("mainImage");
   const captionEl = document.getElementById("mediaCaption");
-  const fullscreenBtn = document.getElementById("fullscreenBtn");
   const ytWrapper = document.getElementById("mainVideoWrapper");
 
   // Reset everything
   mainImage.style.display = "none";
   ytWrapper.innerHTML = "";
   ytWrapper.style.display = "none";
-  fullscreenBtn.style.display = "none";
 
   if (item.type === "image") {
-    // IMAGE case: show the img and fullscreen button
     mainImage.src = item.url;
     mainImage.style.display = "block";
-    fullscreenBtn.style.display = "inline-block";
-    fullscreenBtn.style.opacity = "0.7";
   } else if (item.type === "video") {
-    // VIDEO case: embed YouTube iframe, hide fullscreen button
     const iframe = document.createElement("iframe");
     iframe.id = "ytVideo_" + item.youtubeId;
     iframe.frameBorder = "0";
@@ -1281,9 +1322,6 @@ function showMedia(index) {
     iframe.src = `https://www.youtube-nocookie.com/embed/${item.youtubeId}?rel=0&modestbranding=1`;
     ytWrapper.appendChild(iframe);
     ytWrapper.style.display = "block";
-    fullscreenBtn.style.display = "none";
-  } else {
-    fullscreenBtn.style.display = "none";
   }
 
   captionEl.textContent = item.desc || "";
@@ -1295,6 +1333,33 @@ function showMedia(index) {
     thumb.classList.toggle("active-thumb", idx === currentMediaIndex);
   });
 }
+
+
+const modal = document.getElementById("modalZoom");
+const modalImg = document.getElementById("zoomedImg");
+const closeModalBtn = modal.querySelector(".close");
+
+// Enable click-to-zoom on mainImage
+document.getElementById("mainImage").addEventListener("click", () => {
+  const img = document.getElementById("mainImage");
+  if (img.style.display === "block") {
+    modal.style.display = "block";
+    modalImg.src = img.src;
+  }
+});
+
+// Close when clicking on ✕
+closeModalBtn.onclick = () => {
+  modal.style.display = "none";
+};
+
+// Close when clicking outside the image
+modal.onclick = (e) => {
+  if (e.target === modal) {
+    modal.style.display = "none";
+  }
+};
+
 
     function nextMedia() {
       showMedia(currentMediaIndex + 1);
@@ -1351,11 +1416,14 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
+
 window.addEventListener('load', () => {
   const sidebar = document.getElementById("sidebar");
   const toggleBtn = document.getElementById("sidebarToggleBtn");
   toggleBtn.innerHTML = sidebar.classList.contains("visible") ? "&lt;" : "&gt;";
 });
+
+	
 window.nextMedia  = nextMedia;
 window.prevMedia  = prevMedia;
 window.nextPoint  = nextPoint;
