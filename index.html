@@ -508,26 +508,40 @@ h1, h2, h3, .point-header h2, .time-filter button {
 }
 
 
+/* Desktop: inside top-right corner of sidebar */
 .sidebar-toggle {
-  position: fixed;
-  top: 5px;
-  right: 18px; 
-  z-index: 10001;
+  position: absolute;
+  top: 10px;
+  right: 10px;
   background: #f06292;
   color: white;
   border: none;
   border-radius: 50%;
   width: 24px;
-  height: 22px;
+  height: 24px;
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
+  z-index: 10001;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  transition: right 0.3s ease, transform 0.3s ease;
 }
 
-.sidebar-toggle:hover {
-  background: #e91e63;
+/* Mobile: centered at top of screen */
+@media (max-width: 600px) {
+  .sidebar-toggle {
+    position: fixed;
+    top: 8px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    background: #f06292;
+    color: white;
+    border-radius: 16px;
+    padding: 6px 12px;
+    width: auto;
+    height: auto;
+    font-size: 0.85em;
+  }
 }
 
 
@@ -617,23 +631,7 @@ h1, h2, h3, .point-header h2, .time-filter button {
 }
 
 
-.sidebar-toggle {
-  position: fixed;
-  top: 10px;
-  right: 360px; /* slightly outside the sidebar */
-  z-index: 10001;
-  background: #f06292;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  transition: right 0.3s ease, transform 0.3s ease;
-}
+
 
 .sidebar-toggle:hover {
   background: #e91e63;
@@ -648,10 +646,53 @@ h1, h2, h3, .point-header h2, .time-filter button {
 }
 
 
+
 @media (max-width: 600px) {
-  .sidebar-toggle {
+  .leaflet-control-zoom {
+    display: none !important;
+  }
+}
+
+/* Only show on desktop */
+.desktop-only {
+  display: none;
+}
+@media (min-width: 601px) {
+  .desktop-only {
+    display: block;
+  }
+  .mobile-only {
+    display: none;
+  }
+
+  #sidebarToggleBtnDesktop {
+    position: fixed;
+    top: 10px;
     right: 10px;
-    top: 8px;
+    z-index: 10001;
+    background: #f06292;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+}
+
+/* Optional: style mobile toggle like other buttons */
+@media (max-width: 600px) {
+  #sidebarToggleBtnMobile {
+    padding: 6px 12px;
+    font-size: 0.85em;
+    background: #f06292;
+    color: white;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 }
 
@@ -660,12 +701,18 @@ h1, h2, h3, .point-header h2, .time-filter button {
 </head>
 <body>
   <div id="map"></div>
+<!-- DESKTOP toggle (independent) -->
+<button id="sidebarToggleBtnDesktop" class="sidebar-toggle desktop-only">&gt;</button>
+
+<!-- Buttons Container -->
 <div id="mapButtons">
-  <button id="aboutBtn" class="map-button" onclick="showIntro()" title="View project overview">About</button>
-  <button id="legendToggleBtn" class="map-button" title="Toggle legend categories">📑 Hide Legend</button>
+  <button id="aboutBtn" class="map-button">About</button>
+  <button id="legendToggleBtn" class="map-button">📑 Hide Legend</button>
+  
+  <!-- MOBILE toggle (inline with buttons) -->
+  <button id="sidebarToggleBtnMobile" class="map-button mobile-only">Open</button>
 </div>
 
-<button id="sidebarToggleBtn" class="sidebar-toggle">&lt;</button>
 
   <div id="sidebar">
   <div style="width: 40px; height: 4px; background: #ccc; border-radius: 2px; margin: 8px auto;"></div>
@@ -758,25 +805,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	
   const aboutBtn = document.getElementById("aboutBtn");
   const isMobile = window.matchMedia("(max-width: 600px)").matches;  
- 
-
-	
-const sidebarToggleBtn = document.getElementById("sidebarToggleBtn");
-
-sidebarToggleBtn.addEventListener("click", () => {
-  const sidebar = document.getElementById("sidebar");
-  const isVisible = sidebar.classList.contains("visible");
-
-  if (isVisible) {
-    sidebar.classList.remove("visible");
-    lockBodyScroll(false);
-    sidebarToggleBtn.innerHTML = "&gt;"; // Show >
-  } else {
-    sidebar.classList.add("visible");
-    lockBodyScroll(true);
-    sidebarToggleBtn.innerHTML = "&lt;"; // Show <
-  }
-});
 
 
     function convertGoogleDriveImageLink(url) {
@@ -825,7 +853,7 @@ sidebarToggleBtn.addEventListener("click", () => {
 
 const map = L.map('map', {
   layers: [cartoVoyagerNoLabels],
-  zoomControl: false,
+  zoomControl: true,
   maxBounds: bounds,
   minZoom: 12,
   maxZoom: 20
@@ -1259,8 +1287,6 @@ function lockBodyScroll(lock) {
   document.body.style.overflow = lock ? 'hidden' : 'auto';
 }
 
-document.getElementById("sidebar").classList.add("visible");
-lockBodyScroll(true);
 }
 
 function buildCarousel(items) {
@@ -1384,6 +1410,30 @@ modal.onclick = (e) => {
       document.getElementById("sidebar").classList.remove("visible");
     }
 	
+	function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  const isVisible = sidebar.classList.contains("visible");
+  sidebar.classList.toggle("visible", !isVisible);
+  lockBodyScroll(!isVisible);
+  updateSidebarToggleLabels();
+}
+
+function updateSidebarToggleLabels() {
+  const sidebar = document.getElementById("sidebar");
+  const visible = sidebar.classList.contains("visible");
+  const isMobile = window.innerWidth <= 600;
+
+  document.getElementById("sidebarToggleBtnDesktop").textContent = visible ? "<" : ">";
+  document.getElementById("sidebarToggleBtnMobile").textContent = visible ? "Close" : "Open";
+}
+
+document.getElementById("sidebarToggleBtnDesktop").addEventListener("click", toggleSidebar);
+document.getElementById("sidebarToggleBtnMobile").addEventListener("click", toggleSidebar);
+
+// Keep labels updated on resize
+window.addEventListener("resize", updateSidebarToggleLabels);
+
+	
 function showIntro() {
   const intro     = document.getElementById("sidebar-intro");
   const content   = document.getElementById("sidebar-content");
@@ -1417,13 +1467,6 @@ document.addEventListener('keydown', function(e) {
 });
 
 
-window.addEventListener('load', () => {
-  const sidebar = document.getElementById("sidebar");
-  const toggleBtn = document.getElementById("sidebarToggleBtn");
-  toggleBtn.innerHTML = sidebar.classList.contains("visible") ? "&lt;" : "&gt;";
-});
-
-	
 window.nextMedia  = nextMedia;
 window.prevMedia  = prevMedia;
 window.nextPoint  = nextPoint;
@@ -1431,17 +1474,15 @@ window.prevPoint  = prevPoint;
 window.showIntro  = showIntro;
 
 window.addEventListener('resize', () => {
-  const sidebar = document.getElementById('sidebar');
-  lockBodyScroll(sidebar.classList.contains('visible'));
-});
+  const sidebar = document.getElementById("sidebar");
+  const toggleBtn = document.getElementById("sidebarToggleBtn");
+  const isVisible = sidebar.classList.contains("visible");
 
-document.getElementById("sidebar").classList.add("visible");
-window.addEventListener('load', () => {
-  const btn = document.getElementById('aboutBtn');
-  btn.style.display = 'block';
-  btn.style.opacity = '1';
-  btn.style.pointerEvents = 'auto';
+  toggleBtn.textContent = isVisible
+    ? (window.innerWidth <= 600 ? "Close Sidebar" : "<")
+    : (window.innerWidth <= 600 ? "Open Sidebar" : ">");
 });
+showIntro();
 });
   </script>
 </body>
