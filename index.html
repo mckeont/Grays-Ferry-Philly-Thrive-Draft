@@ -8,29 +8,20 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css">
   <meta http-equiv="Content-Language" content="en">
   <meta name="google" content="notranslate">
-  
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
-
 <style>
-
-html, body {
-  height: 100%;
-}
-
-body {
-  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
-}
-
-
+html, body { height: 100%;}
+body { padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);}
 
 html, body, #map {
   margin: 0;
   padding: 0;
   height: 100vh; /* OR 100% if embedded */
-  width: 100%;
+  width: 100%;	
   overflow: hidden;
   font-family: 'Inter', sans-serif;
 }
+#map { width: 100%; position: relative;}
 
 .readymag-container, .readymag-container iframe {
   width: 100%;
@@ -40,14 +31,9 @@ html, body, #map {
 }
 
 
-#map {
-  width: 100%;
-  position: relative;
-}
 
-h1, h2, h3, .point-header h2, .time-filter button {
-  font-family: 'Shippori Mincho', serif;
-}
+
+h1, h2, h3, .point-header h2, .time-filter button {font-family: 'Shippori Mincho', serif;}
 
 .time-filter {
   display: flex;
@@ -75,9 +61,7 @@ h1, h2, h3, .point-header h2, .time-filter button {
 
 
 
-#sidebar h2, #sidebar p, #sidebar .section, #sidebar-content > *:first-child {
-  margin-top: 10px;
-}
+#sidebar h2, #sidebar p, #sidebar .section, #sidebar-content > *:first-child {margin-top: 10px;}
 
 #mapButtons {
   position: fixed;
@@ -136,22 +120,12 @@ h1, h2, h3, .point-header h2, .time-filter button {
   cursor: pointer;
   z-index: 10011;
 }
-.modal .close:hover {
-  color: #ccc;
-}
+.modal .close:hover {color: #ccc;}
 
 
-#aboutBtn {
-  background: #fce4ec;
-  color: #6a1b9a;
-  border-color: #f8bbd0;
-}
+#aboutBtn {background: #fce4ec; color: #6a1b9a; border-color: #f8bbd0;}
 
-#legendToggleBtn {
-  background: #e3f2fd;
-  color: #0d47a1;
-  border-color: #90caf9;
-}
+#legendToggleBtn {background: #e3f2fd;color: #0d47a1;border-color: #90caf9;}
 
 #sidebar {
   position: absolute;
@@ -168,9 +142,7 @@ h1, h2, h3, .point-header h2, .time-filter button {
   flex-direction: column;
   box-shadow: -2px 0 5px rgba(0,0,0,0.3);
 }
-#sidebar.visible {
-  transform: translateX(0);
-}
+#sidebar.visible {transform: translateX(0);}
 
 #sidebar-tab {
   position: fixed;
@@ -188,21 +160,15 @@ h1, h2, h3, .point-header h2, .time-filter button {
   cursor: pointer;
   transition: background 0.3s ease, transform 0.3s ease;
 }
-#sidebar-tab:hover {
-  background: #ec407a;
-}
+#sidebar-tab:hover { background: #ec407a;}
 #sidebar-tab svg {
   width: 20px;
   height: 20px;
   stroke: white;
   transition: transform 0.3s ease;
 }
-#sidebar-tab svg:hover {
-  stroke: #ddd;
-}
-#sidebar-tab.collapsed {
-  right: 0;
-}
+#sidebar-tab svg:hover { stroke: #ddd;}
+#sidebar-tab.collapsed { right: 0;}
 
 .close-btn {
   position: absolute;
@@ -245,9 +211,7 @@ h1, h2, h3, .point-header h2, .time-filter button {
   cursor: pointer;
   box-shadow: 0 0 5px rgba(0,0,0,0.2);
 }
-.nav-button:hover {
-  background: #4a148c;
-}
+.nav-button:hover { background: #4a148c;}
 
 .point-counter {
   text-align: center;
@@ -288,9 +252,7 @@ h1, h2, h3, .point-header h2, .time-filter button {
   margin: 0 5px;
   cursor: pointer;
 }
-.carousel-arrow:hover {
-  opacity: 1;
-}
+.carousel-arrow:hover {opacity: 1;}
 
 .carousel-thumbnails {
   display: flex;
@@ -330,9 +292,7 @@ h1, h2, h3, .point-header h2, .time-filter button {
   padding: 4px 6px;
   font-size: 1em;
 }
-#fullscreenBtn:hover {
-  background: rgba(0,0,0,0.7);
-}
+#fullscreenBtn:hover {background: rgba(0,0,0,0.7);}
 
 #fullscreenBtn {
   top: 6px;
@@ -344,10 +304,7 @@ h1, h2, h3, .point-header h2, .time-filter button {
   opacity: 0.7;
   transition: opacity 0.2s;
 }
-#fullscreenBtn:hover {
-  opacity: 1;
-}
-
+#fullscreenBtn:hover {opacity: 1;}
 
 #exitFullscreenBtn {
   top: 8px;
@@ -428,15 +385,9 @@ h1, h2, h3, .point-header h2, .time-filter button {
   padding-top: 0;
   display: none;
 }
-#sidebar.is-point-view #sidebar-intro {
-  display: none;
-}
-#sidebar.is-point-view #sidebar-content {
-  display: block;
-}
-#sidebar.intro-view .scrollable-content {
-  padding-top: 0;
-}
+#sidebar.is-point-view #sidebar-intro {display: none;}
+#sidebar.is-point-view #sidebar-content { display: block;}
+#sidebar.intro-view .scrollable-content { padding-top: 0;}
 
 .btn-story {
   display: block;
@@ -454,7 +405,7 @@ h1, h2, h3, .point-header h2, .time-filter button {
 
 .legend {
   position: fixed;
-  bottom: 60px;
+  bottom: 45px;
   left: 0;
   right: auto;
   background: white;
@@ -468,9 +419,7 @@ h1, h2, h3, .point-header h2, .time-filter button {
   transition: transform 0.3s ease;
 }
 
-.legend.collapsed {
-  transform: translateX(-120%);
-}
+.legend.collapsed {transform: translateX(-120%);}
 
 .legend i {
   width: 10px;
@@ -485,9 +434,7 @@ h1, h2, h3, .point-header h2, .time-filter button {
   margin-bottom: 4px;
   cursor: pointer;
 }
-.legend label input {
-  margin-right: 6px;
-}
+.legend label input { margin-right: 6px;}
 
 
 .legend-toggle-btn {
@@ -502,13 +449,8 @@ h1, h2, h3, .point-header h2, .time-filter button {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-.legend {
-  left: 10px !important;
-  right: auto !important;
-}
+.legend {left: 10px !important;right: auto !important;}
 
-
-/* Desktop: inside top-right corner of sidebar */
 .sidebar-toggle {
   position: absolute;
   top: 10px;
@@ -526,7 +468,6 @@ h1, h2, h3, .point-header h2, .time-filter button {
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
-/* Mobile: centered at top of screen */
 @media (max-width: 600px) {
   .sidebar-toggle {
     position: fixed;
@@ -543,7 +484,6 @@ h1, h2, h3, .point-header h2, .time-filter button {
     font-size: 0.85em;
   }
 }
-
 
 @media (max-width: 600px) {
 #mapButtons {
@@ -565,7 +505,6 @@ h1, h2, h3, .point-header h2, .time-filter button {
   z-index: 1001 !important;
 }
 
-
   #legendToggleBtn,
   #aboutBtn {
     padding: 6px 12px;
@@ -586,22 +525,14 @@ h1, h2, h3, .point-header h2, .time-filter button {
     transition: transform 0.3s ease;
     box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
   }
-  #sidebar.visible {
-    transform: translateY(0);
+  #sidebar.visible {transform: translateY(0);
   }
-  #map {
-    height: 100vh;
-  }
-  .leaflet-control-layers {
-    margin-top: 50px;
-  }
+  #map {height: 100vh;}
+  .leaflet-control-layers { margin-top: 50px;}
   .scrollable-content {
     padding: 8px;
   }
-  .btn-story {
-    padding: 8px;
-    font-size: 0.9em;
-  }
+  .btn-story { padding: 8px;font-size: 0.9em;}
   #sidebar-text p {
     text-indent: 0;
     font-weight: normal;
@@ -614,10 +545,7 @@ h1, h2, h3, .point-header h2, .time-filter button {
     transform: translateX(-50%);
   }
 
-
-.leaflet-control-layers {
-  z-index: 500 !important;
-}
+.leaflet-control-layers {z-index: 500 !important;}
 
 
 .leaflet-tooltip.marker-tooltip {
@@ -683,7 +611,13 @@ h1, h2, h3, .point-header h2, .time-filter button {
   }
 }
 
-/* Optional: style mobile toggle like other buttons */
+@media (min-width: 601px) {
+  #sidebarToggleBtnMobile {
+    display: none !important;
+  }
+}
+
+
 @media (max-width: 600px) {
   #sidebarToggleBtnMobile {
     padding: 6px 12px;
@@ -695,6 +629,12 @@ h1, h2, h3, .point-header h2, .time-filter button {
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 }
+
+  @media only screen and (min-width: 601px) {
+    #sidebarToggleBtnMobile {
+      display: none !important;
+    }
+  }
 
 </style>
 
@@ -804,6 +744,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let activePopup = null;
 	
   const aboutBtn = document.getElementById("aboutBtn");
+    aboutBtn.addEventListener("click", showIntro);
+
   const isMobile = window.matchMedia("(max-width: 600px)").matches;  
 
 
@@ -1240,6 +1182,7 @@ if (window.innerWidth <= 600) {
     if (sidebar.classList.contains("visible")) {
       sidebar.classList.remove("visible");
       lockBodyScroll(false);
+	  updateSidebarToggleLabels(); 
     }
   });
 }
@@ -1258,6 +1201,7 @@ sidebar.addEventListener("touchend", e => {
   if (endY - startY > 100) {  // Swipe down threshold
     sidebar.classList.remove("visible");
     lockBodyScroll(false);
+	updateSidebarToggleLabels();    
   }
 });
 
@@ -1455,6 +1399,9 @@ function showIntro() {
   aboutBtn.style.pointerEvents = "auto";
 }
 
+
+updateSidebarToggleLabels();
+
 document.addEventListener('keydown', function(e) {
   if (document.getElementById("sidebar").classList.contains("visible")) {
     if (e.key === "ArrowRight") nextMedia();
@@ -1466,22 +1413,12 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-
 window.nextMedia  = nextMedia;
 window.prevMedia  = prevMedia;
 window.nextPoint  = nextPoint;
 window.prevPoint  = prevPoint;
 window.showIntro  = showIntro;
 
-window.addEventListener('resize', () => {
-  const sidebar = document.getElementById("sidebar");
-  const toggleBtn = document.getElementById("sidebarToggleBtn");
-  const isVisible = sidebar.classList.contains("visible");
-
-  toggleBtn.textContent = isVisible
-    ? (window.innerWidth <= 600 ? "Close Sidebar" : "<")
-    : (window.innerWidth <= 600 ? "Open Sidebar" : ">");
-});
 showIntro();
 });
   </script>
