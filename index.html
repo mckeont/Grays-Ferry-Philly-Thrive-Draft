@@ -991,9 +991,7 @@ function refreshMarkers() {
 }
 
     const categoryIcons = {};
-
     const apiUrl = "https://script.google.com/macros/s/AKfycbzyrIcLZaFyYhwUGviH9bYw5GOzKGooPomy2arJmi2D4V-G8-QF-yME-gqcnaSHUeDYVA/exec";
-
 
 fetch(apiUrl)
   .then(response => response.json())
@@ -1005,7 +1003,6 @@ fetch(apiUrl)
       const category = (location["Category/Layer"] && location["Category/Layer"].trim() !== "")
                          ? location["Category/Layer"].trim()
                          : "Miscellaneous";
-      // Record that this category is in use:
       usedCategories.add(category);
       
       if (!categoryIcons[category] && location["Marker Icon"] && location["Marker Icon"].includes("drive.google.com")) {
@@ -1106,7 +1103,6 @@ const formattedText = rawText
       document.getElementById("sidebar-text").innerHTML = formattedText;
       document.getElementById("sidebar-contributor").textContent = location["Contributed by"] ? "Contributed by: " + location["Contributed by"] : "";
       
-      // Handle Audio (if available)
       if (location.Audio && location.Audio.includes("github.com")) {
         document.getElementById("sidebar-audio").style.display = "block";
         document.getElementById("audio-src").src = location.Audio;
@@ -1157,7 +1153,6 @@ if (isMobileView) {
   offsetPoint = map.latLngToContainerPoint(latlng).add([mapSize.x * 0.25, 0]);
 }
 
-
 map.panTo(map.containerPointToLatLng(offsetPoint), {
   animate: true,
   duration: 0.6
@@ -1171,14 +1166,12 @@ if (activePopup) {
 activePopup = L.tooltip({
   permanent: true,
   direction: 'top',
-  offset: [0, -40],
+  offset: [0, -11],
   className: 'marker-tooltip active-label'
 })
 .setLatLng([parseFloat(location.X), parseFloat(location.Y)])
 .setContent(`<strong>${location.Name}</strong>`)
 .addTo(map);
-
-
 
   console.log("Sidebar updated for:", location);
 	  document.getElementById("aboutBtn").style.display = "block";
@@ -1198,7 +1191,6 @@ if (window.innerWidth <= 600) {
   });
 }
 
-
 	if (window.innerWidth <= 600) {
   const sidebar = document.getElementById("sidebar");
   let startY = 0;
@@ -1215,9 +1207,6 @@ sidebar.addEventListener("touchend", e => {
 	updateSidebarToggleLabels();    
   }
 });
-
-
-	  
 	  const exitFullscreenBtn = document.getElementById("exitFullscreenBtn");
 
 document.addEventListener("fullscreenchange", () => {
@@ -1315,12 +1304,10 @@ function showMedia(index) {
   });
 }
 
-
 const modal = document.getElementById("modalZoom");
 const modalImg = document.getElementById("zoomedImg");
 const closeModalBtn = modal.querySelector(".close");
 
-// Enable click-to-zoom on mainImage
 document.getElementById("mainImage").addEventListener("click", () => {
   const img = document.getElementById("mainImage");
   if (img.style.display === "block") {
@@ -1329,18 +1316,15 @@ document.getElementById("mainImage").addEventListener("click", () => {
   }
 });
 
-// Close when clicking on ✕
 closeModalBtn.onclick = () => {
   modal.style.display = "none";
 };
 
-// Close when clicking outside the image
 modal.onclick = (e) => {
   if (e.target === modal) {
     modal.style.display = "none";
   }
 };
-
 
     function nextMedia() {
       showMedia(currentMediaIndex + 1);
@@ -1385,9 +1369,7 @@ function updateSidebarToggleLabels() {
 document.getElementById("sidebarToggleBtnDesktop").addEventListener("click", toggleSidebar);
 document.getElementById("sidebarToggleBtnMobile").addEventListener("click", toggleSidebar);
 
-// Keep labels updated on resize
 window.addEventListener("resize", updateSidebarToggleLabels);
-
 	
 function showIntro() {
   const intro     = document.getElementById("sidebar-intro");
@@ -1399,17 +1381,13 @@ function showIntro() {
     sidebar.classList.add("visible");
     lockBodyScroll(true);
   }
-
   intro.style.display = "block";
   intro.style.position = "static";
   intro.style.visibility = "visible";
-
   content.style.display = "none";
-
   aboutBtn.style.opacity = "1";
   aboutBtn.style.pointerEvents = "auto";
 }
-
 
 updateSidebarToggleLabels();
 
@@ -1423,7 +1401,6 @@ document.addEventListener('keydown', function(e) {
     }
   }
 });
-
 
 window.nextMedia  = nextMedia;
 window.prevMedia  = prevMedia;
